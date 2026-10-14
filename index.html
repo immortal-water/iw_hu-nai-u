@@ -3,37 +3,39 @@
 <html lang="zh-CN" class="js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>中国奶龙大学</title>
-<meta name="description" content="奶龙正在护送你前往中国奶龙大学。">
+<title>湖南奶娃大学</title>
+<meta name="description" content="奶娃正在护送你前往湖南奶娃大学。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="中国奶龙大学">
-<meta property="og:description" content="奶龙正在护送你前往中国奶龙大学">
-<meta property="og:image" content="https://nailong.dykey.net/og.jpg">
+<meta property="og:title" content="湖南奶娃大学">
+<meta property="og:description" content="奶娃正在护送你前往湖南奶娃大学">
+<meta property="og:image" content="./resource/core.png">
 <meta name="twitter:card" content="summary">
-<link rel="icon" type="image/png" href="https://xn--fiqs8srwb9iv6f6w9n.com/favicon.png">
+<link rel="icon" type="image/png" href="./resource/core.png">
 <!-- 资源一律用绝对路径：任意路径都会返回本页，相对路径会在 /a/b 下失效 -->
-<link rel="preload" as="image" type="image/webp" href="./中国奶龙大学_files/ring.webp">
-<link rel="preload" as="image" type="image/webp" href="./中国奶龙大学_files/core.webp">
+<link rel="preload" as="image" type="image/png" href="./resource/ring.png">
+<link rel="preload" as="image" type="image/png" href="./resource/core.png">
 <!-- 有 JS 时先播开场动画再显示校区；没有 JS 时直接显示三个校区 -->
 <script>document.documentElement.classList.add('js')</script>
 <style>
   :root {
-    --bg: #fffbef;
-    --fg: #3a2c00;
-    --muted: #8f7a45;
-    --ink: #fece0e;
-    --track: rgba(254, 206, 14, .22);
+    --bg: #fff8f5;
+    --fg: #4a3038;
+    --muted: #9c8189;
+    --ink: #f6b3c6;
+    --ink-2: #f6e3a1;
+    --ink-3: #bcd9ea;
+    --track: rgba(246, 179, 198, .3);
     --card: #ffffff;
     --size: min(64vw, 44vh, 340px);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #15120a;
-      --fg: #f6edd0;
-      --muted: #a8996c;
-      --track: rgba(254, 206, 14, .16);
-      --card: #221d12;
+      --bg: #1a1416;
+      --fg: #f7e8ec;
+      --muted: #b09aa1;
+      --track: rgba(246, 179, 198, .18);
+      --card: #241c1f;
     }
   }
 
@@ -60,9 +62,8 @@
   }
   .choosing main { opacity: 0; transform: scale(1.08); pointer-events: none; }
 
-  /* 开场：白底圆盘 + 旋转文字环 + 不转的中心奶龙，外面一圈进度条 */
+  /* 开场：旋转文字环 + 不转的中心奶娃（洋娃娃风，背景已透明），外面一圈进度条 */
   .badge { position: relative; width: var(--size); aspect-ratio: 1; }
-  .badge::before { content: ""; position: absolute; inset: 1.4%; border-radius: 50%; background: #fff; }
   .badge img { position: absolute; inset: 0; width: 100%; height: 100%; }
   .progress { position: absolute; inset: -5.5%; width: 111%; height: 111%; transform: rotate(-90deg); overflow: visible; }
   .progress circle { fill: none; stroke-width: 1.1; stroke-linecap: round; }
@@ -86,7 +87,7 @@
      裁掉的部分也不响应点击。截图和标签做等速反向旋转，看起来不动，像三扇窗户绕着中心转。
      旋转都用 rotate/scale/translate 独立属性，才能和 hover、离场的缩放叠加。0.866 = cos 30°。 */
   /* --spin-at（0~1）由脚本每次开场随机设置：所有旋转动画用同一个负延迟，从随机角度开始且保持同步 */
-  .sectors { --period: 160s; --spin-delay: calc(var(--period) * var(--spin-at, 0) * -1); position: fixed; inset: 0; z-index: 1; overflow: hidden; background: #15120a; }
+  .sectors { --period: 160s; --spin-delay: calc(var(--period) * var(--spin-at, 0) * -1); position: fixed; inset: 0; z-index: 1; overflow: hidden; background: #1a1416; }
   .js .sectors { opacity: 0; visibility: hidden; transition: opacity .6s ease .2s, visibility 0s .8s; }
   .choosing .sectors { opacity: 1; visibility: visible; transition: opacity .6s ease .2s, visibility 0s; }
   .wheel { position: absolute; inset: 0; }
@@ -114,7 +115,7 @@
     --d: 27vmin;
     position: absolute; translate: -50% -50%;
     padding: 10px 20px; border-radius: 14px; text-align: center; white-space: nowrap;
-    background: rgba(20, 16, 5, .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    background: rgba(26, 20, 22, .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     transition: background-color .25s, color .25s, scale .25s;
   }
   .choosing .sector-label { animation: unspin var(--period) linear var(--spin-delay) infinite; }
@@ -124,7 +125,7 @@
   .sector.left .sector-label  { left: calc(50% - var(--d) * .866); top: calc(50% + var(--d) / 2); }
   .sector.right .sector-label { left: calc(50% + var(--d) * .866); top: calc(50% + var(--d) / 2); }
   .sector:hover .sector-label, .sector:focus-visible .sector-label, .sector.picked .sector-label {
-    background: var(--ink); color: #3a2c00; scale: 1.06;
+    background: var(--ink); color: #4a3038; scale: 1.06;
   }
 
   .ray {
@@ -134,10 +135,11 @@
   }
   .js .ray { transform: rotate(var(--a)) scaleX(0); }
   .choosing .ray { animation: ray .7s cubic-bezier(.2, .7, .2, 1) .3s forwards; }
+  /* 中心圆盘：边框用婴儿蓝，中心图用奶娃（core.png，背景已透明） */
   .hub {
     position: absolute; left: 50%; top: 50%; width: clamp(64px, 11vmin, 96px); aspect-ratio: 1;
-    border: 4px solid var(--ink); border-radius: 50%; pointer-events: none;
-    background: #fff url(/core.webp) center / 150% no-repeat; box-shadow: 0 6px 24px rgba(0, 0, 0, .4);
+    border: 4px solid var(--ink-3); border-radius: 50%; pointer-events: none;
+    background: #fff url(./resource/core.png) center / 150% no-repeat; box-shadow: 0 6px 24px rgba(0, 0, 0, .4);
     transform: translate(-50%, -50%);
   }
   .js .hub { transform: translate(-50%, -50%) scale(0); }
@@ -157,7 +159,7 @@
     transition: color .2s, background-color .2s, text-decoration-color .2s, opacity .3s;
   }
   .about-btn:hover, .about-btn:focus-visible { color: var(--fg); text-decoration-color: currentColor; }
-  .choosing .about-btn { padding: 6px 14px; background: rgba(20, 16, 5, .6); color: #fff; }
+  .choosing .about-btn { padding: 6px 14px; background: rgba(26, 20, 22, .6); color: #fff; }
   .leaving .about-btn { opacity: 0; }
   .about {
     width: min(360px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px;
@@ -165,7 +167,7 @@
     cursor: auto; user-select: text;
   }
   .about[open] { animation: rise .25s ease-out; }
-  .about::backdrop { background: rgba(20, 16, 5, .45); backdrop-filter: blur(3px); }
+  .about::backdrop { background: rgba(26, 20, 22, .45); backdrop-filter: blur(3px); }
   .about-body { padding: 24px 22px 18px; }
   .about h2 { font-size: 18px; margin-bottom: 12px; }
   .about p { font-size: 14px; line-height: 1.7; }
@@ -177,7 +179,7 @@
   }
   .about form { margin-top: 18px; text-align: right; }
   .about form button {
-    padding: 8px 18px; border: 0; border-radius: 999px; background: var(--ink); color: #3a2c00;
+    padding: 8px 18px; border: 0; border-radius: 999px; background: var(--ink-2); color: #4a3038;
     font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
@@ -216,29 +218,32 @@
         <circle class="track" cx="50" cy="50" r="49"></circle>
         <circle class="bar" cx="50" cy="50" r="49" pathLength="100"></circle>
       </svg>
-      <img class="ring" src="./中国奶龙大学_files/ring.webp" alt="" width="720" height="720">
-      <img class="core" src="./中国奶龙大学_files/core.webp" alt="" width="720" height="720">
+      <img class="ring" src="./resource/ring.png" alt="" width="1254" height="1254">
+      <img class="core" src="./resource/core.png" alt="" width="1254" height="1254">
     </div>
   </div>
   <div class="copy">
-    <h1>中国奶龙大学</h1>
-    <p class="status">奶龙正在护送你前往 <strong>中国奶龙大学</strong><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></p>
+    <h1>湖南奶娃大学</h1>
+    <p class="status">奶娃正在护送你前往 <strong>湖南奶娃大学</strong><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></p>
     <p class="hint" id="hint">立即前往</p>
   </div>
 </main>
 <nav class="sectors" aria-label="选择校区" style="--spin-at: 0.9179;">
   <div class="wheel">
-    <a class="sector top" href="https://www.dlut.edu.cn/" aria-label="中国奶龙大学凌水校区">
-      <img src="./中国奶龙大学_files/campus-lingshui.webp" alt="" width="1440" height="900">
-      <span class="sector-label"><small>中国奶龙大学</small><b>凌水校区</b></span>
+    <a class="sector top" href="https://www.xtu.edu.cn/" aria-label="湖南奶娃大学奶娃本部">
+      <!-- 奶娃本部 → main.jpg：湘大校园湖景全景 -->
+      <img src="./resource/main.jpg" alt="" width="5760" height="2448">
+      <span class="sector-label"><small>湖南奶娃大学</small><b>奶娃本部</b></span>
     </a>
-    <a class="sector left" href="https://www.dlut.edu.cn/xbxy/kfqxq.htm" aria-label="中国奶龙大学开发区校区">
-      <img src="./中国奶龙大学_files/campus-kaifaqu.webp" alt="" width="1440" height="900">
-      <span class="sector-label"><small>中国奶龙大学</small><b>开发区校区</b></span>
+    <a class="sector left" href="https://xxxy.xtu.edu.cn/" aria-label="湖南奶娃大学兴湘奶娃分院">
+      <!-- 兴湘奶娃分院 → xx.png：三道拱门 + 主席铜像草坪 -->
+      <img src="./resource/xx.png" alt="" width="1920" height="450">
+      <span class="sector-label"><small>湖南奶娃大学</small><b>兴湘奶娃分院</b></span>
     </a>
-    <a class="sector right" href="https://panjin.dlut.edu.cn/" aria-label="中国奶龙大学盘锦校区">
-      <img src="./中国奶龙大学_files/campus-panjin.webp" alt="" width="1440" height="720">
-      <span class="sector-label"><small>中国奶龙大学</small><b>盘锦校区</b></span>
+    <a class="sector right" href="https://www.xtu.edu.cn/xdgk/xxjj.htm" aria-label="湖南奶娃大学羊牯塘奶娃基地">
+      <!-- 羊牯塘奶娃基地 → kaixuediyike.png：2026 年新生开学第一课 -->
+      <img src="./resource/kaixuediyike.png" alt="" width="6120" height="2600">
+      <span class="sector-label"><small>湖南奶娃大学</small><b>羊牯塘奶娃基地</b></span>
     </a>
     <i class="ray" style="--a: 90deg"></i>
     <i class="ray" style="--a: 210deg"></i>
@@ -250,8 +255,8 @@
 <dialog class="about" id="about" aria-labelledby="about-title">
   <div class="about-body">
     <h2 id="about-title">关于本站</h2>
-    <p>本站为奶龙站点：打开 中国奶龙大学.com，会先加载此页面，把你送到大连<del>奶</del>理工大学官网。</p>
-    <p>本站与大连理工大学并无任何官方关联。校徽取自群u <code>微微一奶很龙龙</code>，十分感谢。</p>
+    <p>本站为奶娃站点：打开 湖南奶娃大学.com，会先加载此页面，把你送到湘潭<del>奶</del>大学官网。</p>
+    <p>本站与湘潭大学无任何官方关联。奶娃娃是一只洋娃娃，它只是很想去湘大看看。</p>
     <form method="dialog"><button>知道了</button></form>
   </div>
 </dialog>
@@ -358,7 +363,4 @@
   start();
 })();
 </script>
-<script type="module" src="./中国奶龙大学_files/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;d0748e874d0c4e8bba6c8cbd1aede186&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
-
-
 </body></html>
