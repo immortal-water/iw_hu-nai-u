@@ -161,6 +161,23 @@
   .about-btn:hover, .about-btn:focus-visible { color: var(--fg); text-decoration-color: currentColor; }
   .choosing .about-btn { padding: 6px 14px; background: rgba(26, 20, 22, .6); color: #fff; }
   .leaving .about-btn { opacity: 0; }
+
+  /* 左上角「奶龙博物馆」入口：一块洋娃娃配色的方块，转到选校区时变成深色胶囊 */
+  .museum-btn {
+    position: fixed; z-index: 2; left: max(8px, env(safe-area-inset-left)); top: max(8px, env(safe-area-inset-top));
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 12px 8px 9px; border-radius: 999px;
+    color: var(--muted); font-size: 13px; letter-spacing: .04em; text-decoration: none;
+    transition: color .2s, background-color .2s, opacity .3s;
+  }
+  .museum-btn .cube { width: 17px; height: 17px; flex: none; }
+  .museum-btn:hover, .museum-btn:focus-visible { color: var(--fg); background: var(--track); }
+  .choosing .museum-btn {
+    padding: 6px 14px 6px 11px; background: rgba(26, 20, 22, .6); color: #fff;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  }
+  .choosing .museum-btn:hover, .choosing .museum-btn:focus-visible { background: rgba(26, 20, 22, .8); color: #fff; }
+  .leaving .museum-btn { opacity: 0; }
   .about {
     width: min(360px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px;
     background: var(--card); color: var(--fg); box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
@@ -173,6 +190,7 @@
   .about p { font-size: 14px; line-height: 1.7; }
   .about p + p { margin-top: 8px; }
   .about del { color: var(--muted); text-decoration-thickness: 4px; }
+  .about a { color: var(--fg); font-weight: 700; text-underline-offset: 3px; }
   .about code {
     padding: 1px 6px; border-radius: 6px; background: var(--track);
     font: inherit; font-weight: 700; white-space: nowrap;
@@ -252,11 +270,21 @@
   <span class="hub"></span>
 </nav>
 <button class="about-btn" id="about-btn" type="button">关于</button>
+<!-- 左上角入口：奶龙博物馆的服务器相册 -->
+<a class="museum-btn" id="museum-btn" href="./mcserver.html">
+  <svg class="cube" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 1.5 22.5 7 12 12.5 1.5 7Z" fill="#f6b3c6"></path>
+    <path d="M1.5 7 12 12.5 12 23 1.5 17.5Z" fill="#dfa0b0"></path>
+    <path d="M22.5 7 12 12.5 12 23 22.5 17.5Z" fill="#bcd9ea"></path>
+  </svg>
+  <span>奶龙博物馆</span>
+</a>
 <dialog class="about" id="about" aria-labelledby="about-title">
   <div class="about-body">
     <h2 id="about-title">关于本站</h2>
     <p>本站为奶娃站点：打开 湖南奶娃大学.com，会先加载此页面，把你送到湘潭<del>奶</del>大学官网。</p>
     <p>本站与湘潭大学无任何官方关联。奶娃娃是一只洋娃娃，它只是很想去湘大看看。</p>
+    <p>另有玩家自建的 Minecraft 服务器「奶龙博物馆」，<a href="./mcserver.html">进来看看相册 →</a></p>
     <form method="dialog"><button>知道了</button></form>
   </div>
 </dialog>
@@ -282,6 +310,7 @@
   const sectors = [...document.querySelectorAll('.sector')];
   const aboutBtn = document.getElementById('about-btn');
   const about = document.getElementById('about');
+  const museumBtn = document.getElementById('museum-btn');
   aboutBtn.hidden = false; // 没有 JS 时弹窗打不开，按钮也就不显示
 
   let state, timer, deadline, remaining, chooseAt = 0; // state: intro → choosing → leaving
@@ -351,10 +380,11 @@
   });
   about.addEventListener('click', e => { if (e.target === about) about.close(); }); // 点遮罩关闭
 
-  // 开场阶段点击或按键直接切到选校区；「关于」相关的操作和 Tab、修饰键除外
+  // 开场阶段点击或按键直接切到选校区；「关于」「奶龙博物馆」的操作和 Tab、修饰键除外
   const IGNORED_KEYS = ['Tab', 'Shift', 'Control', 'Alt', 'Meta'];
   function skip(e) {
-    if (state !== 'intro' || about.open || aboutBtn.contains(e.target)) return;
+    if (state !== 'intro' || about.open) return;
+    if (aboutBtn.contains(e.target) || museumBtn.contains(e.target)) return;
     if (e.type === 'keydown' && IGNORED_KEYS.includes(e.key)) return;
     choose(e.type === 'keydown');
   }

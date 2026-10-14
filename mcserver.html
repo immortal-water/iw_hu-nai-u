@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>奶龙博物馆 · 服务器相册</title>
+<meta name="description" content="奶龙博物馆 Minecraft 服务器的游玩截图。">
+<meta name="theme-color" content="#fff8f5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="奶龙博物馆 · 服务器相册">
+<meta property="og:description" content="奶龙博物馆 Minecraft 服务器的游玩截图。">
+<!-- 资源一律用绝对路径 /pic/…：站点对未知路径会回落，相对路径在 /a/b 下会失效 -->
+<!-- 页面本身是静态的：图片清单和成员数据都由 tools/build_mcserver.py 写进 /pic/gallery.js -->
+<style>
+  :root {
+    --bg: #fff8f5;
+    --fg: #4a3038;
+    --muted: #9c8189;
+    --ink: #f6b3c6;
+    --ink-2: #f6e3a1;
+    --ink-3: #bcd9ea;
+    --track: rgba(246, 179, 198, .3);
+    --card: #ffffff;
+    --radius: 16px;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1416;
+      --fg: #f7e8ec;
+      --muted: #b09aa1;
+      --track: rgba(246, 179, 198, .18);
+      --card: #241c1f;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    padding-bottom: 72px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { width: min(1180px, 100% - 32px); margin: 0 auto; }
+
+  /* 页头：服务器列表条（照游戏里那一行的样式做，数据实时查） */
+  .status {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center;
+    margin-top: 24px; padding: 14px 16px; border-radius: var(--radius);
+    background: #14100f; color: #fff; box-shadow: 0 12px 34px rgba(74, 48, 56, .16);
+  }
+  .status[hidden] { display: none; }
+  .s-icon {
+    width: 64px; height: 64px; border-radius: 4px; flex: none;
+    image-rendering: pixelated; background: #2a2320 center / cover no-repeat;
+  }
+  .s-body { min-width: 0; }
+  .s-name { font-size: 16px; font-weight: 700; letter-spacing: .05em; }
+  .s-motd { margin-top: 2px; font-size: 13px; line-height: 1.5; word-break: break-word; }
+  .s-addr { margin-top: 5px; font-size: 12px; color: #9c8189; letter-spacing: .06em; }
+  .s-reload {
+    margin-left: 6px; padding: 0 4px; border: 0; border-radius: 5px; background: none;
+    color: #9c8189; font: inherit; font-size: 12px; cursor: pointer;
+    transition: color .2s, background-color .2s;
+  }
+  .s-reload:hover, .s-reload:focus-visible { color: #fff; background: rgba(255, 255, 255, .14); }
+  .s-right { text-align: right; }
+  .s-count { font-size: 14px; font-weight: 700; letter-spacing: .04em; }
+  .s-bars { display: flex; gap: 2px; justify-content: flex-end; align-items: flex-end; height: 18px; margin-top: 6px; }
+  .s-bars i { width: 4px; border-radius: 1px; background: rgba(255, 255, 255, .2); }
+  .s-bars i:nth-child(1) { height: 6px; }
+  .s-bars i:nth-child(2) { height: 9px; }
+  .s-bars i:nth-child(3) { height: 12px; }
+  .s-bars i:nth-child(4) { height: 15px; }
+  .s-bars i:nth-child(5) { height: 18px; }
+  .status[data-state="online"] .s-bars i { background: #55ff55; }
+  .status[data-state="loading"] .s-icon { opacity: .35; }
+  .status[data-state="offline"] { opacity: .75; }
+  .status[data-state="offline"] .s-name { color: #ff8080; }
+
+  /* 接口整个查不到时的兜底：还显示原来那张服务器列表截图 */
+  .banner {
+    display: block; margin-top: 24px; border-radius: var(--radius); overflow: hidden;
+    background: #14100f; box-shadow: 0 12px 34px rgba(74, 48, 56, .16);
+  }
+  .banner img { display: block; width: 100%; height: auto; }
+  .banner[hidden] { display: none; }
+
+  h1 { margin: 30px 0 8px; font-size: clamp(22px, 4vw, 32px); font-weight: 800; letter-spacing: .12em; }
+  .sub { color: var(--muted); font-size: 14px; letter-spacing: .04em; }
+  .sub-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .dice {
+    display: inline-flex; align-items: center; gap: 7px; padding: 7px 15px;
+    border: 0; border-radius: 999px; background: var(--card); color: var(--fg);
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(74, 48, 56, .1);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .dice:hover, .dice:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(74, 48, 56, .18); }
+  .dice:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .dice[hidden] { display: none; }
+
+  /* 截图网格 */
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px; margin-top: 24px;
+  }
+  .shot {
+    padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: zoom-in;
+    background: var(--track); box-shadow: 0 6px 18px rgba(74, 48, 56, .1);
+    transition: transform .3s ease, box-shadow .3s ease, opacity .45s ease;
+  }
+  .shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .shot:hover, .shot:focus-visible { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(74, 48, 56, .2); }
+  .shot:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  /* 滚进视野才浮上来；.in 一加上，这条就不再命中，hover 效果照常接管 */
+  .anim .shot:not(.in) { opacity: 0; transform: translateY(12px); transition-delay: var(--d, 0ms); }
+
+  .empty {
+    grid-column: 1 / -1; padding: 28px 24px; border-radius: var(--radius);
+    background: var(--card); color: var(--muted); font-size: 14px; line-height: 1.8;
+  }
+  .empty code {
+    padding: 1px 6px; border-radius: 6px; background: var(--track);
+    font: inherit; font-weight: 700; white-space: nowrap;
+  }
+
+  /* 服务器成员 */
+  .members { margin-top: 46px; }
+  .members h2 { font-size: 18px; letter-spacing: .1em; margin-bottom: 14px; }
+  .members h2::before {
+    content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 9px;
+    border-radius: 3px; background: var(--ink); vertical-align: middle;
+  }
+  .member-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; list-style: none; }
+  .member {
+    position: relative; display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px; border: 0; border-radius: 12px; cursor: pointer; text-align: left;
+    background: var(--card); color: inherit; font: inherit;
+    box-shadow: 0 4px 14px rgba(74, 48, 56, .08);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .member:hover, .member:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(74, 48, 56, .16); }
+  .member:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .member img { width: 40px; height: 40px; border-radius: 9px; flex: none; background: var(--track); }
+  .member span { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 在线的人头像右下角点一颗绿点（名单来自服务器状态接口） */
+  .member .dot {
+    position: absolute; left: 38px; top: 38px; width: 11px; height: 11px;
+    border-radius: 50%; background: #55ff55; border: 2px solid var(--card); display: none;
+  }
+  .member.online .dot { display: block; }
+  /* 点一下把 ID 抄进剪贴板，卡片整个翻成婴儿蓝提示 1.2 秒 */
+  .member.copied::after {
+    content: attr(data-msg); position: absolute; inset: 0; display: grid; place-items: center;
+    border-radius: 12px; background: var(--ink-3); color: #2b3b46; font-size: 13px; font-weight: 700;
+    animation: rise .18s ease-out;
+  }
+
+  /* 灯箱 */
+  .viewer {
+    width: 100%; height: 100%; max-width: 100%; max-height: 100%; margin: 0;
+    padding: 20px; border: 0; background: transparent; color: #fff;
+  }
+  .viewer[open] { display: grid; place-items: center; }
+  .viewer::backdrop { background: rgba(20, 16, 18, .88); backdrop-filter: blur(4px); }
+  .viewer-box { display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 100%; }
+  .viewer-box img {
+    max-width: 100%; max-height: calc(100vh - 120px); border-radius: 14px;
+    background: rgba(0, 0, 0, .3); box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+  }
+  .viewer-box figcaption { padding-top: 12px; font-size: 13px; letter-spacing: .1em; opacity: .8; }
+  .viewer button {
+    position: absolute; border: 0; color: #fff; cursor: pointer; font: inherit;
+    background: rgba(255, 255, 255, .16); backdrop-filter: blur(6px);
+    transition: background-color .2s;
+  }
+  .viewer button:hover { background: rgba(255, 255, 255, .3); }
+  .viewer button:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .viewer .close { top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; line-height: 1; }
+  .viewer .nav { top: 50%; transform: translateY(-50%); width: 46px; height: 76px; border-radius: 14px; font-size: 30px; line-height: 1; }
+  .viewer .nav.prev { left: 16px; }
+  .viewer .nav.next { right: 16px; }
+  .viewer .dl {
+    position: absolute; top: 16px; right: 66px; width: 40px; height: 40px;
+    display: grid; place-items: center; border-radius: 50%; color: #fff; text-decoration: none;
+    background: rgba(255, 255, 255, .16); backdrop-filter: blur(6px); font-size: 18px;
+    transition: background-color .2s;
+  }
+  .viewer .dl:hover { background: rgba(255, 255, 255, .3); }
+  .viewer .dl:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .viewer-hint { margin-top: 6px; font-size: 12px; letter-spacing: .08em; opacity: .55; }
+
+  .totop {
+    position: fixed; z-index: 3; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+    width: 44px; height: 44px; border: 0; border-radius: 50%; cursor: pointer;
+    background: var(--card); color: var(--fg); font: inherit; font-size: 18px;
+    box-shadow: 0 8px 22px rgba(74, 48, 56, .18);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .totop:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(74, 48, 56, .26); }
+  .totop:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .totop[hidden] { display: none; }
+
+  @keyframes fadein { from { opacity: 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+  footer { margin-top: 52px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .viewer .nav { width: 38px; height: 60px; font-size: 24px; }
+    .viewer .nav.prev { left: 6px; }
+    .viewer .nav.next { right: 6px; }
+    .viewer .dl { right: 60px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shot, .viewer button, .viewer .dl, .dice, .member, .totop { transition: none; }
+    .shot:hover, .shot:focus-visible, .member:hover, .member:focus-visible, .dice:hover, .totop:hover { transform: none; }
+    .member.copied::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <!-- 服务器列表条：打开页面查一次 api.mcsrvstat.us，样式照着游戏里那一行做 -->
+    <section class="status" id="status" data-state="loading" aria-label="服务器状态">
+      <img class="s-icon" id="status-icon" alt="" width="64" height="64">
+      <div class="s-body">
+        <p class="s-name" id="status-name">奶龙博物馆</p>
+        <p class="s-motd" id="status-motd">正在查询服务器状态…</p>
+        <p class="s-addr"><span id="status-addr"></span><button class="s-reload" id="status-reload" type="button" aria-label="重新查询服务器状态">↻</button></p>
+      </div>
+      <div class="s-right">
+        <p class="s-count" id="status-count">—</p>
+        <div class="s-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </section>
+    <!-- 状态接口整个够不着时，退回原来那张服务器列表截图 -->
+    <a class="banner" id="banner-link" hidden><img id="banner" alt="奶龙博物馆服务器列表"></a>
+    <h1>服务器相册</h1>
+    <div class="sub-row">
+      <p class="sub">奶龙博物馆 · <span id="count">加载中</span></p>
+      <button class="dice" id="dice" type="button" hidden>🎲 随机看一张</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid" id="gallery" aria-label="服务器截图"></section>
+
+    <!-- 服务器成员：数据来自 members.txt，跑脚本后写进 /pic/gallery.js；没有成员时整块隐藏 -->
+    <section class="members" id="members" hidden>
+      <h2>服务器成员</h2>
+      <ul class="member-list" id="member-list"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>本站是玩家自建服务器的玩家相册，与 Mojang Studios 及微软无任何关联。</p>
+  </footer>
+</div>
+
+<dialog class="viewer" id="viewer" aria-label="查看截图">
+  <figure class="viewer-box">
+    <img id="viewer-img" alt="">
+    <figcaption>
+      <span id="viewer-pos"></span>
+      <span class="viewer-hint" id="viewer-hint">← → 翻页 · 可左右滑动 · Esc 关闭</span>
+    </figcaption>
+  </figure>
+  <button class="nav prev" id="prev" type="button" aria-label="上一张">‹</button>
+  <button class="nav next" id="next" type="button" aria-label="下一张">›</button>
+  <a class="dl" id="dl" download aria-label="下载这张原图">↓</a>
+  <button class="close" id="close" type="button" aria-label="关闭">×</button>
+</dialog>
+
+<button class="totop" id="totop" type="button" aria-label="回到顶部" hidden>↑</button>
+
+<noscript>
+  <div class="wrap"><p class="empty" style="margin-top:24px">相册需要 JavaScript 才能显示。</p></div>
+</noscript>
+
+<script src="/pic/gallery.js"></script>
+<script>
+(() => {
+  const data = window.MCSERVER;
+  const galleryEl = document.getElementById('gallery');
+  const membersEl = document.getElementById('members');
+  const memberList = document.getElementById('member-list');
+  const countEl = document.getElementById('count');
+  const bannerLink = document.getElementById('banner-link');
+  const bannerEl = document.getElementById('banner');
+  const viewer = document.getElementById('viewer');
+  const viewerImg = document.getElementById('viewer-img');
+  const viewerPos = document.getElementById('viewer-pos');
+  const diceBtn = document.getElementById('dice');
+  const dlLink = document.getElementById('dl');
+  const toTop = document.getElementById('totop');
+  const statusEl = document.getElementById('status');
+  const statusIcon = document.getElementById('status-icon');
+  const statusName = document.getElementById('status-name');
+  const statusMotd = document.getElementById('status-motd');
+  const statusAddr = document.getElementById('status-addr');
+  const statusCount = document.getElementById('status-count');
+  const statusReload = document.getElementById('status-reload');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 服务器状态：查询用 punycode 域名（接口从 URL 路径取主机名，中文要转写），显示用中文域名
+  const SERVER = {
+    api: 'https://api.mcsrvstat.us/3/',
+    query: 'mc.xn--6kr28k0g6tq9c797c.com',
+    address: 'mc.湖南奶娃大学.com',
+    title: '奶龙博物馆'
+  };
+  const memberCards = [];   // 等状态回来给在线的人点绿点
+
+  if (!data) {
+    countEl.textContent = '数据未加载';
+    galleryEl.innerHTML = '<p class="empty">没读到 /pic/gallery.js。'
+      + '先在仓库根目录跑一次 <code>python tools/build_mcserver.py</code>；'
+      + '如果已经跑过，说明页面不是从站点根目录打开的——<code>/pic/…</code> 这类绝对路径在 file:// 下取不到，'
+      + '本地预览请用 <code>python -m http.server</code>。</p>';
+    return;
+  }
+
+  // 截图横幅只当兜底，平时不显示（见下面 loadStatus 的失败分支）
+  if (data.banner) {
+    bannerEl.src = data.banner.src;
+    bannerEl.width = data.banner.w;
+    bannerEl.height = data.banner.h;
+  }
+
+  // ── 服务器状态：打开页面查一次，之后想刷新点 ↻ ──
+  const MC_COLORS = { 0: '#000000', 1: '#0000aa', 2: '#00aa00', 3: '#00aaaa', 4: '#aa0000', 5: '#aa00aa',
+                      6: '#ffaa00', 7: '#aaaaaa', 8: '#555555', 9: '#5555ff', a: '#55ff55', b: '#55ffff',
+                      c: '#ff5555', d: '#ff55ff', e: '#ffff55', f: '#ffffff' };
+
+  // 把 § 颜色码渲染成 span；一律用 textContent，不碰 innerHTML
+  function renderMotd(lines, el) {
+    el.textContent = '';
+    lines.forEach((line, li) => {
+      if (li) el.appendChild(document.createElement('br'));
+      let color = null, bold = false, italic = false, under = false, strike = false, buf = '';
+      const flush = () => {
+        if (!buf) return;
+        const span = document.createElement('span');
+        span.textContent = buf;
+        if (color) span.style.color = color;
+        if (bold) span.style.fontWeight = '700';
+        if (italic) span.style.fontStyle = 'italic';
+        if (under) span.style.textDecoration = 'underline';
+        if (strike) span.style.textDecoration = 'line-through';
+        el.appendChild(span);
+        buf = '';
+      };
+      for (let i = 0; i < line.length; i++) {
+        if (line[i] === '§' && i + 1 < line.length) {
+          const code = line[++i].toLowerCase();
+          flush();
+          if (MC_COLORS[code]) { color = MC_COLORS[code]; bold = italic = under = strike = false; }
+          else if (code === 'l') bold = true;
+          else if (code === 'o') italic = true;
+          else if (code === 'n') under = true;
+          else if (code === 'm') strike = true;
+          else if (code === 'r') { color = null; bold = italic = under = strike = false; }
+          continue;                      // k（乱码效果）直接吞掉
+        }
+        buf += line[i];
+      }
+      flush();
+    });
+  }
+
+  // 在线名单和成员表对上的，头像右下角点绿点
+  function markOnline(names) {
+    const set = new Set(names.map(n => String(n).toLowerCase()));
+    memberCards.forEach(c => c.el.classList.toggle('online', set.has(c.id.toLowerCase())));
+  }
+
+  async function loadStatus() {
+    statusEl.hidden = false;
+    statusEl.dataset.state = 'loading';
+    statusEl.removeAttribute('title');
+    statusName.textContent = SERVER.title;
+    statusMotd.textContent = '正在查询服务器状态…';
+    statusCount.textContent = '—';
+    statusAddr.textContent = SERVER.address;
+    statusIcon.removeAttribute('src');
+    markOnline([]);
+
+    let payload = null;
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 12000);
+      const resp = await fetch(SERVER.api + SERVER.query, { signal: ctl.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      if (resp.ok) payload = await resp.json();
+    } catch (err) {
+      payload = null;                    // 超时、断网、接口 500 都走兜底
+    }
+
+    if (!payload) {                      // 接口够不着 ≠ 服务器离线，退回截图更诚实
+      statusEl.hidden = true;
+      bannerLink.hidden = !data.banner;
+      return;
+    }
+    bannerLink.hidden = true;
+
+    if (payload.icon) statusIcon.src = payload.icon;
+
+    if (!payload.online) {
+      statusEl.dataset.state = 'offline';
+      statusMotd.textContent = '服务器离线';
+      statusCount.textContent = '—';
+      statusEl.title = '服务器没有响应（服务器没开，或者穿透隧道没通）';
+      return;
+    }
+
+    statusEl.dataset.state = 'online';
+    renderMotd((payload.motd && (payload.motd.raw || payload.motd.clean)) || [SERVER.title], statusMotd);
+    const players = payload.players || {};
+    const list = Array.isArray(players.list) ? players.list : [];
+    statusCount.textContent = (players.online || 0) + '/' + (players.max || '?');
+    markOnline(list.map(p => p && p.name).filter(Boolean));
+    statusEl.title = '版本 ' + (payload.version || '?')
+      + '　在线 ' + (players.online || 0) + '/' + (players.max || '?')
+      + (list.length ? '' : '（服务端没有公开在线名单）');
+  }
+
+  statusAddr.textContent = SERVER.address;
+  statusReload.addEventListener('click', loadStatus);
+  loadStatus();
+
+  // 截图网格
+  const shots = data.shots || [];
+  countEl.textContent = shots.length ? shots.length + ' 张截图' : '还没有截图';
+
+  // 滚进视野时逐张浮上来；关掉动画偏好就整段跳过
+  const animate = !reduceMotion && 'IntersectionObserver' in window;
+  if (animate) document.documentElement.classList.add('anim');
+  const io = animate ? new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    });
+  }, { rootMargin: '0px 0px -6% 0px' }) : null;
+
+  if (shots.length) {
+    const frag = document.createDocumentFragment();
+    shots.forEach((shot, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'shot';
+      btn.style.aspectRatio = shot.w + ' / ' + shot.h;
+      btn.style.setProperty('--d', Math.min(i, 8) * 45 + 'ms'); // 一排排错开浮上来
+      btn.setAttribute('aria-label', '第 ' + (i + 1) + ' 张截图');
+      const img = document.createElement('img');
+      img.src = shot.thumb;
+      img.width = shot.w;
+      img.height = shot.h;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = '';
+      btn.appendChild(img);
+      btn.addEventListener('click', () => openViewer(i));
+      if (io) io.observe(btn);
+      frag.appendChild(btn);
+    });
+    galleryEl.appendChild(frag);
+    diceBtn.hidden = false;
+  } else {
+    galleryEl.innerHTML = '<p class="empty">pic/ 里还没有图片。丢几张进去，'
+      + '再跑一次 <code>python tools/build_mcserver.py</code>。</p>';
+  }
+
+  // 灯箱：先出缩略图再换成原图，← → 翻页、Home/End 跳首尾、Esc 关闭、左右滑动也行
+  let cur = 0;
+  function paint() {
+    const shot = shots[cur];
+    viewerImg.src = shot.thumb;                 // 缩略图已在缓存里，先顶上去，免得白等
+    viewerImg.alt = '第 ' + (cur + 1) + ' 张截图';
+    viewerPos.textContent = (cur + 1) + ' / ' + shots.length;
+    dlLink.href = shot.src;
+    dlLink.download = shot.src.split('/').pop() || 'screenshot.jpg';
+    const full = new Image();                   // 原图下好了再换，翻太快也不会串图
+    full.onload = () => { if (shots[cur] === shot) viewerImg.src = shot.src; };
+    full.src = shot.src;
+    [-1, 1].forEach(d => {                      // 顺手把左右邻居的缩略图预取回来
+      const n = shots[(cur + d + shots.length) % shots.length];
+      if (n) new Image().src = n.thumb;
+    });
+  }
+  function step(delta) {
+    cur = (cur + delta + shots.length) % shots.length;
+    paint();
+  }
+  function openViewer(i) {
+    cur = i;
+    paint();
+    if (!viewer.open) viewer.showModal();
+    document.body.style.overflow = 'hidden';   // 看图时别让背景跟着滚
+  }
+  document.getElementById('prev').addEventListener('click', e => { e.stopPropagation(); step(-1); });
+  document.getElementById('next').addEventListener('click', e => { e.stopPropagation(); step(1); });
+  document.getElementById('close').addEventListener('click', () => viewer.close());
+  viewer.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'Home') { cur = 0; paint(); }
+    else if (e.key === 'End') { cur = shots.length - 1; paint(); }
+  });
+
+  // 左右滑动翻页（按钮上的手势不算）
+  let startX = 0, startY = 0, swiping = false, swiped = false;
+  viewer.addEventListener('pointerdown', e => {
+    if (e.target.closest('button, a')) return;
+    swiping = true; swiped = false; startX = e.clientX; startY = e.clientY;
+  });
+  viewer.addEventListener('pointerup', e => {
+    if (!swiping) return;
+    swiping = false;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      swiped = true;
+      step(dx < 0 ? 1 : -1);
+    }
+  });
+  viewer.addEventListener('click', e => {
+    if (swiped) { swiped = false; return; }     // 刚划过就别顺手把灯箱关了
+    if (e.target === viewer) viewer.close();
+  });
+  viewer.addEventListener('close', () => {
+    viewerImg.removeAttribute('src');          // 别让大图常驻
+    document.body.style.overflow = '';
+  });
+
+  // 服务器成员
+  const members = data.members || [];
+  if (members.length) {
+    const frag = document.createDocumentFragment();
+    members.forEach(m => {
+      const li = document.createElement('li');
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'member';
+      card.title = '点击复制 ID：' + m.id;
+      const img = document.createElement('img');
+      if (m.avatar) img.src = m.avatar;          // 头像来自 playerdb.co，仓库存的是链接
+      img.width = 40;
+      img.height = 40;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = '';
+      const name = document.createElement('span');
+      name.textContent = m.name || m.id;
+      const dot = document.createElement('i');
+      dot.className = 'dot';
+      card.append(img, name, dot);
+      card.addEventListener('click', () => copyId(card, m.id));
+      memberCards.push({ id: m.id, el: card });
+      li.appendChild(card);
+      frag.appendChild(li);
+    });
+    memberList.appendChild(frag);
+    membersEl.hidden = false;
+  }
+
+  // 点成员卡片把 ID 抄进剪贴板；剪贴板接口不给用就退回临时 textarea
+  function copyId(card, id) {
+    const done = ok => {
+      card.dataset.msg = ok ? '已复制 ' + id : '复制失败';
+      card.classList.add('copied');
+      setTimeout(() => card.classList.remove('copied'), 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(id).then(() => done(true), () => done(fallbackCopy(id)));
+      return;
+    }
+    done(fallbackCopy(id));
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  // 随机看一张（尽量别抽到当前这张）
+  diceBtn.addEventListener('click', () => {
+    if (!shots.length) return;
+    let next = cur;
+    while (shots.length > 1 && next === cur) next = Math.floor(Math.random() * shots.length);
+    openViewer(next);
+  });
+
+  // 滚远了才浮出「回到顶部」
+  addEventListener('scroll', () => { toTop.hidden = scrollY < 600; }, { passive: true });
+  toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+})();
+</script>
+</body>
+</html>
