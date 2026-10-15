@@ -1,56 +1,56 @@
-/* 由 tools/build_mcserver.py 自动生成，请勿手动编辑 */
+/* 由 mcserver/tools/build_mcserver.py 自动生成，请勿手动编辑 */
 window.MCSERVER = {
  "banner": {
-  "src": "/pic/banner.png",
+  "src": "/mcserver/pic/banner.png",
   "w": 1510,
   "h": 185
  },
  "shots": [
   {
-   "src": "/pic/001.jpg",
-   "thumb": "/pic/thumbs/001.webp",
+   "src": "/mcserver/pic/001.jpg",
+   "thumb": "/mcserver/pic/thumbs/001.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/002.jpg",
-   "thumb": "/pic/thumbs/002.webp",
+   "src": "/mcserver/pic/002.jpg",
+   "thumb": "/mcserver/pic/thumbs/002.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/003.jpg",
-   "thumb": "/pic/thumbs/003.webp",
+   "src": "/mcserver/pic/003.jpg",
+   "thumb": "/mcserver/pic/thumbs/003.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/004.jpg",
-   "thumb": "/pic/thumbs/004.webp",
+   "src": "/mcserver/pic/004.jpg",
+   "thumb": "/mcserver/pic/thumbs/004.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/005.jpg",
-   "thumb": "/pic/thumbs/005.webp",
+   "src": "/mcserver/pic/005.jpg",
+   "thumb": "/mcserver/pic/thumbs/005.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/006.jpg",
-   "thumb": "/pic/thumbs/006.webp",
+   "src": "/mcserver/pic/006.jpg",
+   "thumb": "/mcserver/pic/thumbs/006.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/007.jpg",
-   "thumb": "/pic/thumbs/007.webp",
+   "src": "/mcserver/pic/007.jpg",
+   "thumb": "/mcserver/pic/thumbs/007.webp",
    "w": 2357,
    "h": 1280
   },
   {
-   "src": "/pic/008.jpg",
-   "thumb": "/pic/thumbs/008.webp",
+   "src": "/mcserver/pic/008.jpg",
+   "thumb": "/mcserver/pic/thumbs/008.webp",
    "w": 2357,
    "h": 1280
   }

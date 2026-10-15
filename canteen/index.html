@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>奶娃打饭记 · 奶娃食堂</title>
+<meta name="description" content="奶娃食堂的打饭小游戏：端稳盘子，接住米饭、青菜和鸡腿，躲开辣椒和抹布，看看 60 秒能打多少分。">
+<meta name="theme-color" content="#fff8f5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="奶娃打饭记 · 奶娃食堂">
+<meta property="og:description" content="端稳盘子，接住能吃的，躲开不能吃的。">
+<!-- 资源一律用绝对路径 /canteen/…：站点对未知路径会回落，相对路径在 /a/b 下会失效 -->
+<!-- 页面本身是静态的：文案与数值在 /canteen/data/script.js，逻辑在 /canteen/app.js，没有外部请求 -->
+<link rel="stylesheet" href="/canteen/app.css">
+</head>
+<body data-act="start">
+
+<noscript>
+  <div class="noscript">
+    <h1>奶娃打饭记</h1>
+    <p>这个小游戏要用一点点 JavaScript 才能动起来。你的浏览器把脚本关掉了。</p>
+    <p>没关系，去 <a href="https://www.xtu.edu.cn/">湘潭大学官网</a> 转转，或者回
+      <a href="/">湖南奶娃大学</a>。</p>
+  </div>
+</noscript>
+
+<div class="app" id="app">
+
+  <header class="bar">
+    <button class="chip chip-back" id="back" type="button" hidden aria-label="退出这一局">←</button>
+    <span class="where" id="where">奶娃食堂</span>
+    <div class="progress" id="timebar" role="progressbar" aria-label="这一局剩下的时间"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" hidden><i id="progress"></i></div>
+    <span class="hearts" id="hearts" role="img" aria-label="还剩几条命" hidden></span>
+    <button class="chip" id="pause" type="button" hidden>暂停</button>
+  </header>
+
+  <div class="hud" id="hud" hidden>
+    <b class="hud-score"><span id="score">0</span><small>分</small></b>
+    <i class="hud-combo" id="combo"></i>
+    <em class="hud-say" id="say"></em>
+  </div>
+
+  <main class="stage" id="stage">
+
+    <!-- 食堂：售饭窗口在上，大厅在下。整块都是 SVG，随场地拉伸，不联网 -->
+    <svg class="hall" id="hall" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="cHall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff1de"/>
+          <stop offset=".42" stop-color="#fff8f2"/>
+          <stop offset="1" stop-color="#fbe4e9"/>
+        </linearGradient>
+        <linearGradient id="cSteel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f7fbfd"/>
+          <stop offset="1" stop-color="#ccd9e2"/>
+        </linearGradient>
+        <linearGradient id="cTray" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffffff"/>
+          <stop offset="1" stop-color="#d5e0e7"/>
+        </linearGradient>
+        <radialGradient id="cGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#ffd88a" stop-opacity=".62"/>
+          <stop offset="1" stop-color="#ffd88a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="cFloor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f3dcc9"/>
+          <stop offset="1" stop-color="#e8c8b6"/>
+        </linearGradient>
+      </defs>
+
+      <rect width="1000" height="1000" fill="url(#cHall)"/>
+
+      <!-- 背景光斑，给纵深一点层次 -->
+      <g opacity=".5">
+        <circle cx="150" cy="430" r="120" fill="#f6b3c6" opacity=".3"/>
+        <circle cx="860" cy="500" r="150" fill="#bcd9ea" opacity=".28"/>
+        <circle cx="520" cy="690" r="180" fill="#f6e3a1" opacity=".2"/>
+      </g>
+
+      <!-- 吊灯 -->
+      <g opacity=".85">
+        <line x1="230" y1="0" x2="230" y2="118" stroke="#c9b6a6" stroke-width="4"/>
+        <path d="M186 118h88l-16 40h-56Z" fill="#f7c98a"/>
+        <ellipse cx="230" cy="158" rx="46" ry="10" fill="#ffe0a8"/>
+        <line x1="770" y1="0" x2="770" y2="96" stroke="#c9b6a6" stroke-width="4"/>
+        <path d="M726 96h88l-16 40h-56Z" fill="#f7c98a"/>
+        <ellipse cx="770" cy="136" rx="46" ry="10" fill="#ffe0a8"/>
+      </g>
+
+      <!-- 售饭窗口 -->
+      <g>
+        <rect x="26" y="150" width="948" height="176" rx="20" fill="#fff6ea"/>
+        <rect x="26" y="150" width="948" height="176" rx="20" fill="none" stroke="#e9d3bd" stroke-width="3"/>
+        <ellipse cx="500" cy="250" rx="430" ry="150" fill="url(#cGlow)"/>
+
+        <!-- 四个菜盆 -->
+        <g>
+          <rect x="86" y="196" width="192" height="86" rx="14" fill="url(#cSteel)"/>
+          <rect x="98" y="206" width="168" height="66" rx="10" fill="#c46b3a"/>
+          <rect x="98" y="206" width="168" height="66" rx="10" fill="#8a4a26" opacity=".45"/>
+          <rect x="300" y="196" width="192" height="86" rx="14" fill="url(#cSteel)"/>
+          <rect x="312" y="206" width="168" height="66" rx="10" fill="#63a35a"/>
+          <rect x="312" y="206" width="168" height="66" rx="10" fill="#3d7a37" opacity=".35"/>
+          <rect x="514" y="196" width="192" height="86" rx="14" fill="url(#cSteel)"/>
+          <rect x="526" y="206" width="168" height="66" rx="10" fill="#e0563f"/>
+          <rect x="526" y="206" width="84" height="66" rx="10" fill="#f6c744"/>
+          <rect x="728" y="196" width="192" height="86" rx="14" fill="url(#cSteel)"/>
+          <rect x="740" y="206" width="168" height="66" rx="10" fill="#fdfaf3"/>
+          <path d="M740 258q42-30 84-6t84-8v22H740Z" fill="#efe7d8"/>
+        </g>
+
+        <!-- 蒸汽 -->
+        <g fill="#ffffff" opacity=".5">
+          <path d="M180 176c-16-22 12-30 0-52s-8-28 2-38c-14 16 6 26-2 44s6 30 0 46Z"/>
+          <path d="M396 176c-16-22 12-30 0-52s-8-28 2-38c-14 16 6 26-2 44s6 30 0 46Z"/>
+          <path d="M610 176c-16-22 12-30 0-52s-8-28 2-38c-14 16 6 26-2 44s6 30 0 46Z"/>
+          <path d="M824 176c-16-22 12-30 0-52s-8-28 2-38c-14 16 6 26-2 44s6 30 0 46Z"/>
+        </g>
+
+        <!-- 玻璃挡板与不锈钢台面 -->
+        <rect x="40" y="258" width="920" height="52" rx="8" fill="#ffffff" opacity=".38"/>
+        <rect x="40" y="258" width="920" height="6" rx="3" fill="#ffffff" opacity=".7"/>
+        <rect x="16" y="310" width="968" height="30" rx="15" fill="url(#cTray)"/>
+        <rect x="16" y="334" width="968" height="10" rx="5" fill="#c2ced6"/>
+      </g>
+
+      <!-- 大厅：地板与两边的长桌 -->
+      <g>
+        <rect x="0" y="836" width="1000" height="164" fill="url(#cFloor)"/>
+        <g stroke="#d8b49c" stroke-width="3" opacity=".7">
+          <line x1="0" y1="884" x2="1000" y2="884"/>
+          <line x1="0" y1="936" x2="1000" y2="936"/>
+          <line x1="0" y1="988" x2="1000" y2="988"/>
+          <line x1="200" y1="836" x2="200" y2="1000"/>
+          <line x1="400" y1="836" x2="400" y2="1000"/>
+          <line x1="600" y1="836" x2="600" y2="1000"/>
+          <line x1="800" y1="836" x2="800" y2="1000"/>
+        </g>
+        <!-- 两侧的长桌，中间留给奶娃 -->
+        <g fill="#c8a288" opacity=".5">
+          <rect x="-30" y="762" width="210" height="20" rx="10"/>
+          <rect x="8" y="782" width="16" height="76" rx="6"/>
+          <rect x="146" y="782" width="16" height="76" rx="6"/>
+          <rect x="820" y="762" width="210" height="20" rx="10"/>
+          <rect x="858" y="782" width="16" height="76" rx="6"/>
+          <rect x="996" y="782" width="16" height="76" rx="6"/>
+        </g>
+      </g>
+    </svg>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- 掉落区：菜和奶娃都按归一化坐标摆在这上面 -->
+    <div class="playfield" id="field" aria-hidden="true">
+    <div class="drops" id="drops"></div>
+
+    <!-- 奶娃：和入学记里是同一只，黄衣小奶娃，表情由 data-mood 切换 -->
+    <div class="tray-wrap" id="tray">
+      <svg class="naiwa" id="naiwa" viewBox="0 0 140 176" width="140" height="176" data-mood="idle">
+        <defs>
+          <radialGradient id="nwHead" cx="36%" cy="24%" r="84%">
+            <stop offset="0%" stop-color="#fff6bb"/>
+            <stop offset="50%" stop-color="#ffd94a"/>
+            <stop offset="100%" stop-color="#eeb000"/>
+          </radialGradient>
+          <radialGradient id="nwHand" cx="34%" cy="26%" r="82%">
+            <stop offset="0%" stop-color="#ffeb96"/>
+            <stop offset="100%" stop-color="#f2b808"/>
+          </radialGradient>
+          <radialGradient id="nwShoe" cx="36%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#ffee9e"/>
+            <stop offset="100%" stop-color="#f5c000"/>
+          </radialGradient>
+          <!-- 黄白格子布：横竖两条半透明色带叠出深浅两档格子 -->
+          <pattern id="nwGingham" width="14" height="14" patternUnits="userSpaceOnUse">
+            <rect width="14" height="14" fill="#fffdf5"/>
+            <rect width="7" height="14" fill="#ffc107" opacity=".62"/>
+            <rect width="14" height="7" fill="#ffc107" opacity=".62"/>
+          </pattern>
+        </defs>
+
+        <ellipse class="n-shadow" cx="70" cy="168" rx="32" ry="5.5"/>
+
+        <g class="n-bob">
+
+          <!-- 鞋 -->
+          <ellipse cx="49" cy="152" rx="15" ry="11" fill="#f0b400"/>
+          <ellipse cx="91" cy="152" rx="15" ry="11" fill="#f0b400"/>
+          <ellipse cx="49" cy="149" rx="15" ry="10" fill="url(#nwShoe)"/>
+          <ellipse cx="91" cy="149" rx="15" ry="10" fill="url(#nwShoe)"/>
+          <g transform="translate(49,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+          <g transform="translate(91,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+
+          <!-- 连衣裙 -->
+          <path d="M40 100H100L120 128q1 6-5 6H25q-6 0-5-6Z" fill="url(#nwGingham)"/>
+          <!-- 裙摆蕾丝 -->
+          <path d="M20 132a8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+          <!-- 泡泡袖与小手 -->
+          <g class="n-arm n-arm-l">
+            <circle cx="26" cy="106" r="15" fill="url(#nwGingham)"/>
+            <ellipse cx="18" cy="121" rx="8" ry="10" fill="url(#nwHand)"/>
+          </g>
+          <g class="n-arm n-arm-r">
+            <circle cx="114" cy="106" r="15" fill="url(#nwGingham)"/>
+            <ellipse cx="122" cy="121" rx="8" ry="10" fill="url(#nwHand)"/>
+          </g>
+
+          <!-- 白围裙，印着建校年份 -->
+          <path d="M50 106h40q4 0 4 4v14q0 4-4 4H50q-4 0-4-4v-14q0-4 4-4Z" fill="#fffdf5"/>
+          <text x="70" y="121" text-anchor="middle" font-size="16" font-weight="700" fill="#e8a000">1958</text>
+
+          <!-- 领口蕾丝 -->
+          <path d="M40.6 100a9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+          <!-- 头 -->
+          <circle cx="70" cy="66" r="42" fill="url(#nwHead)"/>
+
+          <!-- 眼睛 -->
+          <g class="n-eye">
+            <circle cx="57.5" cy="80" r="11.8" fill="#241c14"/>
+            <circle cx="82.5" cy="80" r="11.8" fill="#241c14"/>
+            <circle cx="53.3" cy="75.5" r="4.1" fill="#ffffff"/>
+            <circle cx="78.3" cy="75.5" r="4.1" fill="#ffffff"/>
+            <circle cx="61.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+            <circle cx="86.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+          </g>
+          <g class="n-eye-shut">
+            <path d="M44 80.5q13 9 26 0M70 80.5q13 9 26 0" stroke="#241c14" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          </g>
+
+          <!-- 嘴 -->
+          <path class="m-idle"  d="M62 92q8 6 16 0"  fill="none" stroke="#3b2c10" stroke-width="2.6" stroke-linecap="round"/>
+          <path class="m-smile" d="M58 90q12 12 24 0" fill="none" stroke="#3b2c10" stroke-width="3" stroke-linecap="round"/>
+          <path class="m-flat"  d="M63 93h14"          fill="none" stroke="#3b2c10" stroke-width="2.6" stroke-linecap="round"/>
+          <ellipse class="m-o" cx="70" cy="93" rx="3.8" ry="4.6" fill="#3b2c10"/>
+
+          <!-- 格子布兜帽 + 蕾丝边 + 蝴蝶结 -->
+          <path d="M22 62A48 48 0 0 1 118 62Z" fill="url(#nwGingham)"/>
+          <path d="M22 57a8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+          <g transform="translate(101,43) rotate(-20)">
+            <ellipse cx="-10" cy="-3" rx="10" ry="7.5" fill="#ffc800" transform="rotate(-16 -10 -3)"/>
+            <ellipse cx="10" cy="-3" rx="10" ry="7.5" fill="#ffd94a" transform="rotate(16 10 -3)"/>
+            <circle r="4" fill="#ffa800"/>
+          </g>
+
+        </g>
+      </svg>
+
+      <!-- 盘子：盘心正好落在判定线上，菜就落在这上面 -->
+      <svg class="plate" viewBox="0 0 140 44" width="140" height="44">
+        <ellipse cx="70" cy="32" rx="66" ry="8" fill="rgba(26,20,22,.16)"/>
+        <ellipse cx="70" cy="21" rx="64" ry="16" fill="#c6d4dd"/>
+        <ellipse cx="70" cy="17" rx="64" ry="16" fill="#f4f8fb"/>
+        <ellipse cx="70" cy="17" rx="50" ry="11.5" fill="#e4edf2"/>
+      </svg>
+    </div>
+    </div>
+
+    <div class="pausebox" id="pausebox" hidden>
+      <p id="pausetext"></p>
+      <button class="primary" id="resume" type="button">继续</button>
+    </div>
+
+    <section class="panel" id="panel">
+      <p class="kicker" id="kicker"></p>
+      <h1 class="title" id="title"></h1>
+      <div class="lines" id="lines" aria-live="polite"></div>
+      <p class="prompt" id="prompt"></p>
+      <div class="controls" id="controls"></div>
+      <p class="toast" id="toast" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="disclaimer"></span>
+    <span class="credit">奶娃形象与食堂插画均为本站自绘；没有第三方素材，也不联网。</span>
+  </footer>
+
+</div>
+
+<script src="/canteen/data/script.js"></script>
+<script src="/canteen/app.js"></script>
+</body>
+</html>

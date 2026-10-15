@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>奶娃入学记 · 羊牯塘奶娃基地</title>
+<meta name="description" content="以奶娃的视角走一遍 2026 级新生报到：到站、进校门、北京路报到、缴费、入住、开学第一课、逛校园集章。">
+<meta name="theme-color" content="#fff8f5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="奶娃入学记 · 羊牯塘奶娃基地">
+<meta property="og:description" content="以奶娃的视角走一遍 2026 级新生报到。">
+<!-- 资源一律用绝对路径 /enroll/…：站点对未知路径会回落，相对路径在 /a/b 下会失效 -->
+<!-- 页面本身是静态的：文案在 /enroll/data/script.js，逻辑在 /enroll/app.js，照片在 /enroll/assets/photos/ -->
+<link rel="stylesheet" href="/enroll/app.css">
+</head>
+<body data-act="start">
+
+<noscript>
+  <div class="noscript">
+    <h1>奶娃入学记</h1>
+    <p>这一段报到流程要用一点点 JavaScript 才能走。你的浏览器把脚本关掉了。</p>
+    <p>没关系，直接去 <a href="https://www.xtu.edu.cn/">湘潭大学官网</a> 看看，或者回
+      <a href="/">湖南奶娃大学</a>。</p>
+  </div>
+</noscript>
+
+<div class="app" id="app">
+
+  <header class="bar">
+    <button class="chip chip-back" id="back" type="button" hidden aria-label="回到上一幕">←</button>
+    <div class="progress" role="progressbar" aria-label="报到进度" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0">
+      <i id="progress"></i>
+    </div>
+    <button class="chip" id="reset" type="button">重新开始</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="photo" id="photo" aria-hidden="true"></div>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- 奶娃：黄衣小奶娃，形象参考 resource/core.png
+         格子布兜帽 + 蕾丝边 + 黄蝴蝶结，白围裙上印着建校年份
+         表情由 data-mood 切换，动画全在 CSS 里 -->
+    <div class="naiwa-wrap" id="naiwa-wrap" aria-hidden="true">
+      <svg class="naiwa" id="naiwa" viewBox="0 0 140 176" width="140" height="176" data-mood="idle">
+        <defs>
+          <radialGradient id="nwHead" cx="36%" cy="24%" r="84%">
+            <stop offset="0%" stop-color="#fff6bb"/>
+            <stop offset="50%" stop-color="#ffd94a"/>
+            <stop offset="100%" stop-color="#eeb000"/>
+          </radialGradient>
+          <radialGradient id="nwHand" cx="34%" cy="26%" r="82%">
+            <stop offset="0%" stop-color="#ffeb96"/>
+            <stop offset="100%" stop-color="#f2b808"/>
+          </radialGradient>
+          <radialGradient id="nwShoe" cx="36%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#ffee9e"/>
+            <stop offset="100%" stop-color="#f5c000"/>
+          </radialGradient>
+          <!-- 黄白格子布：横竖两条半透明色带叠出深浅两档格子 -->
+          <pattern id="nwGingham" width="14" height="14" patternUnits="userSpaceOnUse">
+            <rect width="14" height="14" fill="#fffdf5"/>
+            <rect width="7" height="14" fill="#ffc107" opacity=".62"/>
+            <rect width="14" height="7" fill="#ffc107" opacity=".62"/>
+          </pattern>
+        </defs>
+
+        <ellipse class="n-shadow" cx="70" cy="168" rx="32" ry="5.5"/>
+
+        <g class="n-bob">
+
+          <!-- 鞋 -->
+          <ellipse cx="49" cy="152" rx="15" ry="11" fill="#f0b400"/>
+          <ellipse cx="91" cy="152" rx="15" ry="11" fill="#f0b400"/>
+          <ellipse cx="49" cy="149" rx="15" ry="10" fill="url(#nwShoe)"/>
+          <ellipse cx="91" cy="149" rx="15" ry="10" fill="url(#nwShoe)"/>
+          <g transform="translate(49,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+          <g transform="translate(91,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+
+          <!-- 连衣裙 -->
+          <path d="M40 100H100L120 128q1 6-5 6H25q-6 0-5-6Z" fill="url(#nwGingham)"/>
+          <!-- 裙摆蕾丝 -->
+          <path d="M20 132a8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+          <!-- 泡泡袖与小手 -->
+          <g class="n-arm n-arm-l">
+            <circle cx="26" cy="106" r="15" fill="url(#nwGingham)"/>
+            <ellipse cx="18" cy="121" rx="8" ry="10" fill="url(#nwHand)"/>
+          </g>
+          <g class="n-arm n-arm-r">
+            <circle cx="114" cy="106" r="15" fill="url(#nwGingham)"/>
+            <ellipse cx="122" cy="121" rx="8" ry="10" fill="url(#nwHand)"/>
+          </g>
+
+          <!-- 白围裙，印着建校年份 -->
+          <path d="M50 106h40q4 0 4 4v14q0 4-4 4H50q-4 0-4-4v-14q0-4 4-4Z" fill="#fffdf5"/>
+          <text x="70" y="121" text-anchor="middle" font-size="16" font-weight="700" fill="#e8a000">1958</text>
+
+          <!-- 领口蕾丝 -->
+          <path d="M40.6 100a9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+          <!-- 头 -->
+          <circle cx="70" cy="66" r="42" fill="url(#nwHead)"/>
+
+          <!-- 眼睛 -->
+          <g class="n-eye">
+            <circle cx="57.5" cy="80" r="11.8" fill="#241c14"/>
+            <circle cx="82.5" cy="80" r="11.8" fill="#241c14"/>
+            <circle cx="53.3" cy="75.5" r="4.1" fill="#ffffff"/>
+            <circle cx="78.3" cy="75.5" r="4.1" fill="#ffffff"/>
+            <circle cx="61.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+            <circle cx="86.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+          </g>
+          <g class="n-eye-shut">
+            <path d="M44 80.5q13 9 26 0M70 80.5q13 9 26 0" stroke="#241c14" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          </g>
+
+          <!-- 嘴 -->
+          <path class="m-idle"  d="M62 92q8 6 16 0"  fill="none" stroke="#3b2c10" stroke-width="2.6" stroke-linecap="round"/>
+          <path class="m-smile" d="M58 90q12 12 24 0" fill="none" stroke="#3b2c10" stroke-width="3" stroke-linecap="round"/>
+          <path class="m-flat"  d="M63 93h14"          fill="none" stroke="#3b2c10" stroke-width="2.6" stroke-linecap="round"/>
+          <ellipse class="m-o" cx="70" cy="93" rx="3.8" ry="4.6" fill="#3b2c10"/>
+
+          <!-- 格子布兜帽 + 蕾丝边 + 蝴蝶结 -->
+          <path d="M22 62A48 48 0 0 1 118 62Z" fill="url(#nwGingham)"/>
+          <path d="M22 57a8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0"
+                fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+          <g transform="translate(101,43) rotate(-20)">
+            <ellipse cx="-10" cy="-3" rx="10" ry="7.5" fill="#ffc800" transform="rotate(-16 -10 -3)"/>
+            <ellipse cx="10" cy="-3" rx="10" ry="7.5" fill="#ffd94a" transform="rotate(16 10 -3)"/>
+            <circle r="4" fill="#ffa800"/>
+          </g>
+
+        </g>
+      </svg>
+    </div>
+
+    <section class="panel" id="panel">
+      <p class="kicker" id="kicker"></p>
+      <h1 class="title" id="title"></h1>
+      <div class="lines" id="lines" aria-live="polite"></div>
+      <p class="prompt" id="prompt"></p>
+      <div class="controls" id="controls"></div>
+      <p class="toast" id="toast" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="disclaimer"></span>
+    <span class="credit">校园照片 © <a href="https://commons.wikimedia.org/wiki/Category:Xiangtan_University">Huangdan2060</a>，CC BY 3.0，来自 Wikimedia Commons</span>
+  </footer>
+
+</div>
+
+<script src="/enroll/data/script.js"></script>
+<script src="/enroll/app.js"></script>
+</body>
+</html>

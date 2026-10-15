@@ -9,8 +9,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="奶龙博物馆 · 服务器相册">
 <meta property="og:description" content="奶龙博物馆 Minecraft 服务器的游玩截图。">
-<!-- 资源一律用绝对路径 /pic/…：站点对未知路径会回落，相对路径在 /a/b 下会失效 -->
-<!-- 页面本身是静态的：图片清单和成员数据都由 tools/build_mcserver.py 写进 /pic/gallery.js -->
+<!-- 资源一律用绝对路径 /mcserver/pic/…：站点对未知路径会回落，相对路径在 /a/b 下会失效 -->
+<!-- 页面本身是静态的：图片清单和成员数据都由 mcserver/tools/build_mcserver.py 写进 /mcserver/pic/gallery.js -->
 <style>
   :root {
     --bg: #fff8f5;
@@ -251,7 +251,7 @@
   <main>
     <section class="grid" id="gallery" aria-label="服务器截图"></section>
 
-    <!-- 服务器成员：数据来自 members.txt，跑脚本后写进 /pic/gallery.js；没有成员时整块隐藏 -->
+    <!-- 服务器成员：数据来自 mcserver/members.txt，跑脚本后写进 /mcserver/pic/gallery.js；没有成员时整块隐藏 -->
     <section class="members" id="members" hidden>
       <h2>服务器成员</h2>
       <ul class="member-list" id="member-list"></ul>
@@ -283,7 +283,7 @@
   <div class="wrap"><p class="empty" style="margin-top:24px">相册需要 JavaScript 才能显示。</p></div>
 </noscript>
 
-<script src="/pic/gallery.js"></script>
+<script src="/mcserver/pic/gallery.js"></script>
 <script>
 (() => {
   const data = window.MCSERVER;
@@ -322,9 +322,9 @@
 
   if (!data) {
     countEl.textContent = '数据未加载';
-    galleryEl.innerHTML = '<p class="empty">没读到 /pic/gallery.js。'
-      + '先在仓库根目录跑一次 <code>python tools/build_mcserver.py</code>；'
-      + '如果已经跑过，说明页面不是从站点根目录打开的——<code>/pic/…</code> 这类绝对路径在 file:// 下取不到，'
+    galleryEl.innerHTML = '<p class="empty">没读到 /mcserver/pic/gallery.js。'
+      + '先在仓库根目录跑一次 <code>python mcserver/tools/build_mcserver.py</code>；'
+      + '如果已经跑过，说明页面不是从站点根目录打开的——<code>/mcserver/pic/…</code> 这类绝对路径在 file:// 下取不到，'
       + '本地预览请用 <code>python -m http.server</code>。</p>';
     return;
   }
@@ -479,8 +479,8 @@
     galleryEl.appendChild(frag);
     diceBtn.hidden = false;
   } else {
-    galleryEl.innerHTML = '<p class="empty">pic/ 里还没有图片。丢几张进去，'
-      + '再跑一次 <code>python tools/build_mcserver.py</code>。</p>';
+    galleryEl.innerHTML = '<p class="empty">mcserver/pic/ 里还没有图片。丢几张进去，'
+      + '再跑一次 <code>python mcserver/tools/build_mcserver.py</code>。</p>';
   }
 
   // 灯箱：先出缩略图再换成原图，← → 翻页、Home/End 跳首尾、Esc 关闭、左右滑动也行

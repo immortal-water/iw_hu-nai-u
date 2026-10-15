@@ -1,2 +1,3 @@
-tools/
-members.txt
+mcserver/tools/
+mcserver/members.txt
+*.md

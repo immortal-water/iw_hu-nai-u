@@ -82,10 +82,10 @@
   .dots i:nth-child(3) { animation-delay: .3s; }
   .hint { font-size: 13px; color: var(--muted); }
 
-  /* 选校区：从屏幕中心出发、两两夹角 120° 的三条射线把屏幕分成三块，整个「转盘」缓慢旋转。
+  /* 选校区：从屏幕中心出发、两两夹角 90° 的四条射线把屏幕分成四块，整个「转盘」缓慢旋转。
      每块是一个铺满全屏的链接，用 clip-path 裁成扇形（顶点伸到 150vmax 外，转到任何角度、任何屏幕比例都能盖满），
-     裁掉的部分也不响应点击。截图和标签做等速反向旋转，看起来不动，像三扇窗户绕着中心转。
-     旋转都用 rotate/scale/translate 独立属性，才能和 hover、离场的缩放叠加。0.866 = cos 30°。 */
+     裁掉的部分也不响应点击。截图和标签做等速反向旋转，看起来不动，像四扇窗户绕着中心转。
+     旋转都用 rotate/scale/translate 独立属性，才能和 hover、离场的缩放叠加。0.7071 = cos 45°。 */
   /* --spin-at（0~1）由脚本每次开场随机设置：所有旋转动画用同一个负延迟，从随机角度开始且保持同步 */
   .sectors { --period: 160s; --spin-delay: calc(var(--period) * var(--spin-at, 0) * -1); position: fixed; inset: 0; z-index: 1; overflow: hidden; background: #1a1416; }
   .js .sectors { opacity: 0; visibility: hidden; transition: opacity .6s ease .2s, visibility 0s .8s; }
@@ -93,37 +93,41 @@
   .wheel { position: absolute; inset: 0; }
   .choosing .wheel { animation: spin var(--period) linear var(--spin-delay) infinite; }
   .sector { position: absolute; inset: 0; color: #fff; text-decoration: none; cursor: pointer; outline: none; }
-  .sector.top   { clip-path: polygon(50% 50%, calc(50% - 129.9vmax) calc(50% - 75vmax), 50% calc(50% - 150vmax), calc(50% + 129.9vmax) calc(50% - 75vmax)); }
-  .sector.right { clip-path: polygon(50% 50%, calc(50% + 129.9vmax) calc(50% - 75vmax), calc(50% + 129.9vmax) calc(50% + 75vmax), 50% calc(50% + 150vmax)); }
-  .sector.left  { clip-path: polygon(50% 50%, 50% calc(50% + 150vmax), calc(50% - 129.9vmax) calc(50% + 75vmax), calc(50% - 129.9vmax) calc(50% - 75vmax)); }
+  .sector.top    { clip-path: polygon(50% 50%, calc(50% - 106.07vmax) calc(50% - 106.07vmax), 50% calc(50% - 150vmax), calc(50% + 106.07vmax) calc(50% - 106.07vmax)); }
+  .sector.right  { clip-path: polygon(50% 50%, calc(50% + 106.07vmax) calc(50% - 106.07vmax), calc(50% + 150vmax) 50%, calc(50% + 106.07vmax) calc(50% + 106.07vmax)); }
+  .sector.bottom { clip-path: polygon(50% 50%, calc(50% + 106.07vmax) calc(50% + 106.07vmax), 50% calc(50% + 150vmax), calc(50% - 106.07vmax) calc(50% + 106.07vmax)); }
+  .sector.left   { clip-path: polygon(50% 50%, calc(50% - 106.07vmax) calc(50% + 106.07vmax), calc(50% - 150vmax) 50%, calc(50% - 106.07vmax) calc(50% - 106.07vmax)); }
 
   /* 截图铺满全屏、反向旋转保持不动；扇区转到哪里就透出哪里 */
   .sector img {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     filter: brightness(.78); transition: filter .35s, scale .9s cubic-bezier(.2, .7, .2, 1);
   }
-  .sector.top img   { object-position: center top; }
-  .sector.left img  { object-position: left top; }
-  .sector.right img { object-position: center top; }
+  .sector.top img    { object-position: center top; }
+  .sector.left img   { object-position: left top; }
+  .sector.right img  { object-position: center top; }
+  .sector.bottom img { object-position: center bottom; }
   .js .sector img { scale: 1.08; }
   .choosing .sector img { scale: 1; animation: unspin var(--period) linear var(--spin-delay) infinite; }
   .sector:hover img, .sector:focus-visible img { filter: none; scale: 1.03; }
   .sectors:hover .sector:not(:hover) img { filter: brightness(.5) saturate(.7); }
 
-  /* 标签放在扇区中线上、离中心 --d，跟着转盘绕中心公转，同时反向自转保持正立 */
+  /* 标签放在扇区中线上、离中心 --d，跟着转盘绕中心公转，同时反向自转保持正立。
+     四个标签两两只隔 90°，所以字号和留白都比三扇区时收了一点，免得窄屏上撞在一起 */
   .sector-label {
     --d: 27vmin;
     position: absolute; translate: -50% -50%;
-    padding: 10px 20px; border-radius: 14px; text-align: center; white-space: nowrap;
+    padding: 9px 14px; border-radius: 14px; text-align: center; white-space: nowrap;
     background: rgba(26, 20, 22, .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     transition: background-color .25s, color .25s, scale .25s;
   }
   .choosing .sector-label { animation: unspin var(--period) linear var(--spin-delay) infinite; }
-  .sector-label small { display: block; font-size: clamp(12px, 1vw, 14px); letter-spacing: .08em; opacity: .8; }
-  .sector-label b { display: block; font-size: clamp(18px, 3vw, 34px); letter-spacing: .1em; }
-  .sector.top .sector-label   { left: 50%; top: calc(50% - var(--d)); }
-  .sector.left .sector-label  { left: calc(50% - var(--d) * .866); top: calc(50% + var(--d) / 2); }
-  .sector.right .sector-label { left: calc(50% + var(--d) * .866); top: calc(50% + var(--d) / 2); }
+  .sector-label small { display: block; font-size: clamp(11px, 1vw, 14px); letter-spacing: .08em; opacity: .8; }
+  .sector-label b { display: block; font-size: clamp(15px, 2.6vw, 34px); letter-spacing: .1em; }
+  .sector.top .sector-label    { left: 50%; top: calc(50% - var(--d)); }
+  .sector.right .sector-label  { left: calc(50% + var(--d)); top: 50%; }
+  .sector.bottom .sector-label { left: 50%; top: calc(50% + var(--d)); }
+  .sector.left .sector-label   { left: calc(50% - var(--d)); top: 50%; }
   .sector:hover .sector-label, .sector:focus-visible .sector-label, .sector.picked .sector-label {
     background: var(--ink); color: #4a3038; scale: 1.06;
   }
@@ -258,20 +262,26 @@
       <img src="./resource/xx.png" alt="" width="1920" height="450">
       <span class="sector-label"><small>湖南奶娃大学</small><b>兴湘奶娃分院</b></span>
     </a>
-    <a class="sector right" href="https://www.xtu.edu.cn/xdgk/xxjj.htm" aria-label="湖南奶娃大学羊牯塘奶娃基地">
-      <!-- 羊牯塘奶娃基地 → kaixuediyike.png：2026 年新生开学第一课 -->
+    <a class="sector right" href="./enroll/" aria-label="湖南奶娃大学羊牯塘奶娃基地">
+      <!-- 羊牯塘奶娃基地 → 站内互动页：以奶娃视角走一遍 2026 级新生报到 -->
       <img src="./resource/kaixuediyike.png" alt="" width="6120" height="2600">
       <span class="sector-label"><small>湖南奶娃大学</small><b>羊牯塘奶娃基地</b></span>
     </a>
-    <i class="ray" style="--a: 90deg"></i>
-    <i class="ray" style="--a: 210deg"></i>
-    <i class="ray" style="--a: 330deg"></i>
+    <a class="sector bottom" href="./canteen/" aria-label="湖南奶娃大学奶娃食堂">
+      <!-- 奶娃食堂 → 站内小游戏：端稳盘子接菜，看看 60 秒能打多少分 -->
+      <img src="./resource/shitang.svg" alt="" width="1920" height="900">
+      <span class="sector-label"><small>湖南奶娃大学</small><b>奶娃食堂</b></span>
+    </a>
+    <i class="ray" style="--a: 45deg"></i>
+    <i class="ray" style="--a: 135deg"></i>
+    <i class="ray" style="--a: 225deg"></i>
+    <i class="ray" style="--a: 315deg"></i>
   </div>
   <span class="hub"></span>
 </nav>
 <button class="about-btn" id="about-btn" type="button">关于</button>
 <!-- 左上角入口：奶龙博物馆的服务器相册 -->
-<a class="museum-btn" id="museum-btn" href="./mcserver.html">
+<a class="museum-btn" id="museum-btn" href="./mcserver/">
   <svg class="cube" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M12 1.5 22.5 7 12 12.5 1.5 7Z" fill="#f6b3c6"></path>
     <path d="M1.5 7 12 12.5 12 23 1.5 17.5Z" fill="#dfa0b0"></path>
@@ -282,9 +292,10 @@
 <dialog class="about" id="about" aria-labelledby="about-title">
   <div class="about-body">
     <h2 id="about-title">关于本站</h2>
-    <p>本站为奶娃站点：打开 湖南奶娃大学.com，会先加载此页面，把你送到湘潭<del>奶</del>大学官网。</p>
+    <p>本站为奶娃站点，页面均为 AI 生成<del>，你可以由此进入湖南奶娃大学官网。</del></p>
     <p>本站与湘潭大学无任何官方关联。奶娃娃是一只洋娃娃，它只是很想去湘大看看。</p>
-    <p>另有玩家自建的 Minecraft 服务器「奶龙博物馆」，<a href="./mcserver.html">进来看看相册 →</a></p>
+    <p>站内还有两处：私人 Minecraft 服务器「奶龙博物馆」的<a href="./mcserver/">相册</a>，
+      和食堂窗口的<a href="./canteen/">打饭小游戏</a>。</p>
     <form method="dialog"><button>知道了</button></form>
   </div>
 </dialog>

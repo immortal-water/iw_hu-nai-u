@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 900" width="1920" height="900"
+     preserveAspectRatio="xMidYMid slice" role="img" aria-label="奶娃食堂：奶娃端着一盘饭菜">
+  <!-- 这张图是给主页面右下角那个 90° 扇区用的：扇区只露出画面下半部分中间那块，
+       所以构图整体压在下半张，主角居中，从上往下依次是 头 → 1958 围裙 → 托盘 → 地砖。 -->
+  <defs>
+    <linearGradient id="scBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe7cd"/>
+      <stop offset=".5" stop-color="#fff6ef"/>
+      <stop offset="1" stop-color="#ffe1ea"/>
+    </linearGradient>
+    <linearGradient id="scFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4ddca"/>
+      <stop offset="1" stop-color="#e4c0ad"/>
+    </linearGradient>
+    <radialGradient id="scWarm" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#ffd88a" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#ffd88a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="scHead" cx="36%" cy="24%" r="84%">
+      <stop offset="0%" stop-color="#fff6bb"/>
+      <stop offset="50%" stop-color="#ffd94a"/>
+      <stop offset="100%" stop-color="#eeb000"/>
+    </radialGradient>
+    <radialGradient id="scHand" cx="34%" cy="26%" r="82%">
+      <stop offset="0%" stop-color="#ffeb96"/>
+      <stop offset="100%" stop-color="#f2b808"/>
+    </radialGradient>
+    <radialGradient id="scShoe" cx="36%" cy="28%" r="80%">
+      <stop offset="0%" stop-color="#ffee9e"/>
+      <stop offset="100%" stop-color="#f5c000"/>
+    </radialGradient>
+    <pattern id="scGing" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#fffdf5"/>
+      <rect width="7" height="14" fill="#ffc107" opacity=".62"/>
+      <rect width="14" height="7" fill="#ffc107" opacity=".62"/>
+    </pattern>
+  </defs>
+
+  <rect width="1920" height="900" fill="url(#scBg)"/>
+  <ellipse cx="960" cy="640" rx="900" ry="520" fill="url(#scWarm)"/>
+  <g opacity=".45">
+    <circle cx="470" cy="700" r="180" fill="#f6b3c6" opacity=".38"/>
+    <circle cx="1470" cy="660" r="210" fill="#bcd9ea" opacity=".34"/>
+    <circle cx="960" cy="880" r="260" fill="#f6e3a1" opacity=".22"/>
+  </g>
+
+  <!-- 地板 -->
+  <rect x="0" y="690" width="1920" height="210" fill="url(#scFloor)"/>
+  <g stroke="#d8b49c" stroke-width="4" opacity=".6">
+    <line x1="0" y1="746" x2="1920" y2="746"/>
+    <line x1="0" y1="812" x2="1920" y2="812"/>
+    <line x1="0" y1="878" x2="1920" y2="878"/>
+    <line x1="240" y1="690" x2="240" y2="900"/>
+    <line x1="520" y1="690" x2="520" y2="900"/>
+    <line x1="800" y1="690" x2="800" y2="900"/>
+    <line x1="1080" y1="690" x2="1080" y2="900"/>
+    <line x1="1360" y1="690" x2="1360" y2="900"/>
+    <line x1="1640" y1="690" x2="1640" y2="900"/>
+  </g>
+
+  <!-- 空中的菜：都落在扇区能看见的那条楔形里 -->
+  <g>
+    <g transform="translate(806,700) rotate(-9) scale(.78)">
+      <ellipse cx="0" cy="34" rx="74" ry="18" fill="rgba(26,20,22,.12)"/>
+      <ellipse cx="0" cy="24" rx="72" ry="26" fill="#e7ecf0"/>
+      <path d="M-64 22q-8-62 64-62t64 62Z" fill="#fffdf7"/>
+      <path d="M-40 4q10-30 40-30t40 30" fill="none" stroke="#efe9dc" stroke-width="6"/>
+    </g>
+    <g transform="translate(1136,724) rotate(11) scale(.76)">
+      <ellipse cx="0" cy="40" rx="78" ry="18" fill="rgba(26,20,22,.12)"/>
+      <ellipse cx="0" cy="30" rx="76" ry="26" fill="#e7ecf0"/>
+      <ellipse cx="0" cy="12" rx="64" ry="40" fill="#5da84f"/>
+      <path d="M-48 16q46-52 96-6" fill="none" stroke="#3f8236" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(690,808) rotate(14) scale(.72)">
+      <ellipse cx="0" cy="42" rx="86" ry="18" fill="rgba(26,20,22,.12)"/>
+      <ellipse cx="0" cy="32" rx="84" ry="26" fill="#e7ecf0"/>
+      <rect x="34" y="2" width="62" height="18" rx="9" fill="#f7f1e6"/>
+      <circle cx="102" cy="-2" r="12" fill="#f7f1e6"/>
+      <circle cx="102" cy="22" r="12" fill="#f7f1e6"/>
+      <ellipse cx="-10" cy="12" rx="62" ry="46" fill="#c47a3c"/>
+      <ellipse cx="-22" cy="0" rx="30" ry="20" fill="#dc9a5c" opacity=".8"/>
+    </g>
+    <g transform="translate(1258,806) rotate(-12) scale(.74)">
+      <ellipse cx="0" cy="44" rx="84" ry="18" fill="rgba(26,20,22,.12)"/>
+      <ellipse cx="0" cy="34" rx="82" ry="26" fill="#e7ecf0"/>
+      <ellipse cx="26" cy="18" rx="46" ry="34" fill="#f6c744"/>
+      <circle cx="-24" cy="4" r="38" fill="#e0563f"/>
+      <circle cx="-38" cy="-8" r="10" fill="#f08a72" opacity=".8"/>
+    </g>
+    <g transform="translate(636,706) rotate(-6) scale(.7)">
+      <ellipse cx="0" cy="46" rx="80" ry="18" fill="rgba(26,20,22,.12)"/>
+      <path d="M-72 8h144l-14 44q-6 16-22 16h-72q-16 0-22-16Z" fill="#e7ecf0"/>
+      <ellipse cx="0" cy="10" rx="72" ry="22" fill="#c98a4b"/>
+      <ellipse cx="0" cy="8" rx="60" ry="16" fill="#dc9a5c"/>
+    </g>
+    <g transform="translate(1300,690) rotate(8) scale(.68)">
+      <ellipse cx="0" cy="46" rx="80" ry="18" fill="rgba(26,20,22,.12)"/>
+      <path d="M-72 8h144l-14 44q-6 16-22 16h-72q-16 0-22-16Z" fill="#e7ecf0"/>
+      <ellipse cx="0" cy="10" rx="72" ry="22" fill="#c98a4b"/>
+      <ellipse cx="0" cy="8" rx="60" ry="16" fill="#dc9a5c"/>
+    </g>
+  </g>
+
+  <!-- 奶娃：和页面上是同一只，黄衣小奶娃，围裙上印着建校年份 -->
+  <g transform="translate(841,521) scale(1.7)">
+    <ellipse cx="70" cy="168" rx="32" ry="5.5" fill="rgba(0,0,0,.18)"/>
+    <ellipse cx="49" cy="152" rx="15" ry="11" fill="#f0b400"/>
+    <ellipse cx="91" cy="152" rx="15" ry="11" fill="#f0b400"/>
+    <ellipse cx="49" cy="149" rx="15" ry="10" fill="url(#scShoe)"/>
+    <ellipse cx="91" cy="149" rx="15" ry="10" fill="url(#scShoe)"/>
+    <g transform="translate(49,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+    <g transform="translate(91,146)"><path d="M0 0-7-5-7 5Z" fill="#fffdf5"/><path d="M0 0 7-5 7 5Z" fill="#fffdf5"/><circle r="2.4" fill="#fff"/></g>
+
+    <path d="M40 100H100L120 128q1 6-5 6H25q-6 0-5-6Z" fill="url(#scGing)"/>
+    <path d="M20 132a8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0 8.35 8.35 0 0 0 16.7 0"
+          fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+    <circle cx="26" cy="106" r="15" fill="url(#scGing)"/>
+    <ellipse cx="18" cy="121" rx="8" ry="10" fill="url(#scHand)"/>
+    <circle cx="114" cy="106" r="15" fill="url(#scGing)"/>
+    <ellipse cx="122" cy="121" rx="8" ry="10" fill="url(#scHand)"/>
+
+    <path d="M50 106h40q4 0 4 4v14q0 4-4 4H50q-4 0-4-4v-14q0-4 4-4Z" fill="#fffdf5"/>
+    <text x="70" y="121" text-anchor="middle" font-size="16" font-weight="700" fill="#e8a000">1958</text>
+
+    <path d="M40.6 100a9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0 9.8 9.8 0 0 0 19.6 0"
+          fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+
+    <circle cx="70" cy="66" r="42" fill="url(#scHead)"/>
+
+    <circle cx="57.5" cy="80" r="11.8" fill="#241c14"/>
+    <circle cx="82.5" cy="80" r="11.8" fill="#241c14"/>
+    <circle cx="53.3" cy="75.5" r="4.1" fill="#ffffff"/>
+    <circle cx="78.3" cy="75.5" r="4.1" fill="#ffffff"/>
+    <circle cx="61.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+    <circle cx="86.8" cy="84.5" r="1.9" fill="#ffffff" opacity=".7"/>
+
+    <path d="M58 90q12 12 24 0" fill="none" stroke="#3b2c10" stroke-width="3" stroke-linecap="round"/>
+
+    <path d="M22 62A48 48 0 0 1 118 62Z" fill="url(#scGing)"/>
+    <path d="M22 57a8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0 8 8 0 0 0 16 0"
+          fill="none" stroke="#fffdf5" stroke-width="2.8" stroke-linecap="round"/>
+    <g transform="translate(101,43) rotate(-20)">
+      <ellipse cx="-10" cy="-3" rx="10" ry="7.5" fill="#ffc800" transform="rotate(-16 -10 -3)"/>
+      <ellipse cx="10" cy="-3" rx="10" ry="7.5" fill="#ffd94a" transform="rotate(16 10 -3)"/>
+      <circle r="4" fill="#ffa800"/>
+    </g>
+  </g>
+
+  <!-- 托盘：端在手里，上面已经接住两样 -->
+  <g>
+    <ellipse cx="960" cy="846" rx="176" ry="26" fill="rgba(26,20,22,.16)"/>
+    <ellipse cx="960" cy="812" rx="172" ry="40" fill="#c2d0da"/>
+    <ellipse cx="960" cy="804" rx="172" ry="40" fill="#f7fbfd"/>
+    <ellipse cx="960" cy="804" rx="134" ry="28" fill="#e2ebf1"/>
+
+    <g transform="translate(902,792) scale(.52) rotate(-6)">
+      <ellipse cx="0" cy="24" rx="72" ry="26" fill="#e7ecf0"/>
+      <path d="M-64 22q-8-62 64-62t64 62Z" fill="#fffdf7"/>
+    </g>
+    <g transform="translate(1032,800) scale(.48) rotate(10)">
+      <ellipse cx="0" cy="30" rx="76" ry="26" fill="#e7ecf0"/>
+      <ellipse cx="0" cy="12" rx="64" ry="40" fill="#5da84f"/>
+      <path d="M-48 16q46-52 96-6" fill="none" stroke="#3f8236" stroke-width="8" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

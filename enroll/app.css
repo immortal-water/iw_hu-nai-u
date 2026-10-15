@@ -1,0 +1,477 @@
+/* 奶娃入学记 · 样式
+   配色与主站、mcserver/ 保持同一套变量 */
+
+:root {
+  --bg: #fff8f5;
+  --fg: #4a3038;
+  --muted: #9c8189;
+  --ink: #f6b3c6;
+  --ink-2: #f6e3a1;
+  --ink-3: #bcd9ea;
+  --track: rgba(246, 179, 198, .3);
+  --card: #ffffff;
+  --panel: rgba(255, 255, 255, .9);
+  --radius: 20px;
+  --shadow: 0 18px 50px rgba(26, 20, 22, .22);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1416;
+    --fg: #f7e8ec;
+    --muted: #b39aa2;
+    --track: rgba(246, 179, 198, .22);
+    --card: #241d20;
+    --panel: rgba(26, 20, 22, .86);
+    --shadow: 0 18px 50px rgba(0, 0, 0, .5);
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overflow: hidden;
+}
+
+a { color: inherit; }
+
+/* ---------------------------------------------------------------- 骨架 */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.bar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+}
+
+.chip {
+  flex: none;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color .2s, background-color .2s;
+}
+.chip:hover, .chip:focus-visible { color: var(--fg); background: var(--track); }
+.chip-back { font-size: 16px; padding: 4px 12px; }
+
+.progress {
+  position: relative;
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ink);
+  transition: width .45s cubic-bezier(.3, .8, .3, 1);
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 背景照片：整块铺满，包括面板后面 */
+.photo {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-color: #2a2024;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.photo.is-in { opacity: 1; }
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top,
+    rgba(26, 20, 22, .92) 0%,
+    rgba(26, 20, 22, .62) 38%,
+    rgba(26, 20, 22, .34) 72%,
+    rgba(26, 20, 22, .22) 100%);
+}
+.photo:not(.is-in) ~ .scrim {
+  background: radial-gradient(120% 90% at 30% 15%,
+    rgba(246, 179, 198, .35), transparent 60%),
+    radial-gradient(120% 90% at 80% 90%,
+    rgba(188, 217, 234, .3), transparent 60%);
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image: radial-gradient(rgba(0, 0, 0, .05) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* ---------------------------------------------------------------- 奶娃 */
+
+.naiwa-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-height: 96px;
+  padding: 0 max(16px, 5vw) 0 0;
+  pointer-events: none;
+}
+
+.naiwa {
+  width: clamp(96px, 17vh, 156px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .3));
+}
+
+.n-shadow { fill: rgba(0, 0, 0, .22); }
+.n-bob { animation: bob 3.2s ease-in-out infinite; transform-origin: 70px 162px; }
+
+.naiwa .m-idle, .naiwa .m-smile, .naiwa .m-flat, .naiwa .m-o { display: none; }
+.naiwa[data-mood="idle"] .m-idle,
+.naiwa[data-mood="happy"] .m-smile,
+.naiwa[data-mood="sleepy"] .m-flat,
+.naiwa[data-mood="worried"] .m-o,
+.naiwa[data-mood="sad"] .m-o { display: block; }
+
+.naiwa .n-eye-shut { display: none; }
+.naiwa[data-mood="sleepy"] .n-eye { display: none; }
+.naiwa[data-mood="sleepy"] .n-eye-shut { display: block; }
+
+.naiwa[data-mood="happy"] .n-arm-r { animation: wave .9s ease-in-out 3; transform-origin: 114px 100px; }
+.naiwa[data-mood="sleepy"] .n-bob { animation-duration: 5s; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) }
+  50%      { transform: translateY(-4px) }
+}
+@keyframes wave {
+  0%, 100% { transform: rotate(0) }
+  35%      { transform: rotate(26deg) }
+}
+
+/* ---------------------------------------------------------------- 面板 */
+
+.panel {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  width: min(100%, 640px);
+  margin: 0 auto;
+  padding: 20px 20px calc(18px + env(safe-area-inset-bottom));
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  animation: rise .38s cubic-bezier(.2, .8, .3, 1);
+  max-height: 72vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--fg);
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px) } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0) }
+  20%      { transform: translateX(-7px) }
+  45%      { transform: translateX(6px) }
+  70%      { transform: translateX(-3px) }
+}
+.panel.shake { animation: shake .42s ease; }
+
+.kicker {
+  margin: 0 0 2px;
+  font-size: 12px;
+  letter-spacing: .22em;
+  color: var(--muted);
+}
+.title {
+  margin: 0 0 12px;
+  font-size: clamp(21px, 5vw, 27px);
+  letter-spacing: .04em;
+}
+.lines p {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+.lines p:last-child { margin-bottom: 0; }
+.lines .caret {
+  display: inline-block;
+  width: 2px; height: 1em;
+  margin-left: 2px;
+  vertical-align: -.12em;
+  background: var(--ink);
+  animation: blink .9s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0 } }
+
+.prompt {
+  margin: 14px 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg);
+}
+.prompt:empty { display: none; }
+
+.controls { display: grid; gap: 8px; }
+
+/* 选项 */
+.choice {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--track);
+  border-radius: 14px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .15s, border-color .2s, background-color .2s;
+}
+.choice:hover, .choice:focus-visible {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 12%, var(--card));
+}
+.choice:active { transform: scale(.985); }
+.choice b { display: block; font-size: 15px; font-weight: 700; }
+.choice small { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.choice[disabled] { opacity: .55; cursor: default; }
+.choice.picked { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 18%, var(--card)); }
+.choice.good { border-color: #8cc6a0; background: color-mix(in srgb, #8cc6a0 18%, var(--card)); }
+.choice.bad { border-color: #e2a2a2; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row .choice { width: auto; flex: 1 1 40%; }
+
+.primary {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink-2);
+  color: #4a3038;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, filter .2s;
+}
+.primary:hover, .primary:focus-visible { filter: brightness(1.05); }
+.primary:active { transform: scale(.97); }
+.ghost {
+  padding: 12px 20px;
+  border: 1px solid var(--track);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+
+/* 文本输入 */
+.field { display: flex; gap: 8px; }
+.field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--track);
+  border-radius: 14px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+}
+.field input:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* 行李 */
+.items { display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+.item {
+  padding: 12px 6px;
+  border: 1px solid var(--track);
+  border-radius: 14px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .15s, border-color .2s, opacity .3s;
+}
+.item i { display: block; font-size: 24px; font-style: normal; line-height: 1.3; }
+.item:hover, .item:focus-visible { border-color: var(--ink); }
+.item:active { transform: scale(.95); }
+.item.gone { opacity: .3; pointer-events: none; border-style: dashed; }
+.item.kept { opacity: .3; pointer-events: none; }
+
+.counter {
+  margin: 10px 0 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 集章 */
+.stamps { display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); }
+.stamp {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 1px solid var(--track);
+  border-radius: 14px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+.stamp .thumb {
+  display: block;
+  aspect-ratio: 16 / 10;
+  background-position: center;
+  background-size: cover;
+  filter: brightness(.82) saturate(.9);
+  transition: filter .3s, scale .6s;
+}
+.stamp:hover .thumb, .stamp:focus-visible .thumb { filter: none; scale: 1.04; }
+.stamp .cap { display: block; padding: 8px 10px 10px; }
+.stamp .cap b { display: block; font-size: 13px; }
+.stamp .cap small { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); line-height: 1.55; }
+.stamp .mark {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #4a3038;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 30px;
+  text-align: center;
+  opacity: 0;
+  scale: .4;
+  rotate: -18deg;
+  transition: opacity .25s, scale .35s cubic-bezier(.34, 1.56, .64, 1), rotate .35s;
+}
+.stamp.got { border-color: var(--ink); }
+.stamp.got .mark { opacity: 1; scale: 1; rotate: 0deg; }
+.stamp.got .thumb { filter: none; }
+
+/* 学生证 */
+.idcard-wrap { text-align: center; }
+.idcard-wrap img {
+  width: min(100%, 420px);
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .28);
+}
+.idcard-wrap .actions { justify-content: center; }
+.hintline { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+
+.toast {
+  margin: 10px 0 0;
+  min-height: 0;
+  font-size: 13px;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.toast.on { opacity: 1; }
+
+/* ---------------------------------------------------------------- 页脚 */
+
+.foot {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 7px 14px max(7px, env(safe-area-inset-bottom));
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+.foot a { text-underline-offset: 2px; }
+
+/* ---------------------------------------------------------------- 无脚本 */
+
+.noscript {
+  max-width: 560px;
+  margin: 15vh auto;
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.noscript h1 { margin-top: 0; font-size: 22px; }
+.noscript a { font-weight: 700; }
+
+/* ---------------------------------------------------------------- 宽屏 */
+
+@media (min-width: 860px) {
+  .stage { align-items: center; }
+  .naiwa-wrap { width: min(100%, 700px); padding-right: 0; }
+  .panel {
+    width: min(100%, 700px);
+    padding: 26px 28px 22px;
+    border-radius: var(--radius);
+    margin-bottom: 4px;
+    max-height: 76vh;
+  }
+  .items { grid-template-columns: repeat(5, 1fr); }
+  .stamps { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .naiwa .n-bob { animation: none; }
+}
