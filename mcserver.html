@@ -226,7 +226,7 @@
 <body>
 <div class="wrap">
   <header>
-    <!-- 服务器列表条：打开页面查一次 api.mcsrvstat.us，样式照着游戏里那一行做 -->
+    <!-- 服务器列表条：打开页面查一次 api.minetools.eu，样式照着游戏里那一行做 -->
     <section class="status" id="status" data-state="loading" aria-label="服务器状态">
       <img class="s-icon" id="status-icon" alt="" width="64" height="64">
       <div class="s-body">
@@ -309,9 +309,12 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // 服务器状态：查询用 punycode 域名（接口从 URL 路径取主机名，中文要转写），显示用中文域名
+  // 用 minetools：它自己会走 SRV 找到隧道端口，缓存只有 10 秒
+  // （mcsrvstat 从它的服务器连不上这个 frp 节点，实测一直 connection timed out）
   const SERVER = {
-    api: 'https://api.mcsrvstat.us/3/',
+    api: 'https://api.minetools.eu/ping/',
     query: 'mc.xn--6kr28k0g6tq9c797c.com',
+    port: 25565,                 // 域名下的默认端口，真实端口由 SRV 决定
     address: 'mc.湖南奶娃大学.com',
     title: '奶龙博物馆'
   };
@@ -394,8 +397,9 @@
     let payload = null;
     try {
       const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), 12000);
-      const resp = await fetch(SERVER.api + SERVER.query, { signal: ctl.signal, cache: 'no-store' });
+      const timer = setTimeout(() => ctl.abort(), 15000);
+      const resp = await fetch(SERVER.api + SERVER.query + '/' + SERVER.port,
+                               { signal: ctl.signal, cache: 'no-store' });
       clearTimeout(timer);
       if (resp.ok) payload = await resp.json();
     } catch (err) {
@@ -409,9 +413,8 @@
     }
     bannerLink.hidden = true;
 
-    if (payload.icon) statusIcon.src = payload.icon;
-
-    if (!payload.online) {
+    // minetools 查不到时返回 {"error":"timed out"}
+    if (payload.error || !payload.version) {
       statusEl.dataset.state = 'offline';
       statusMotd.textContent = '服务器离线';
       statusCount.textContent = '—';
@@ -420,14 +423,16 @@
     }
 
     statusEl.dataset.state = 'online';
-    renderMotd((payload.motd && (payload.motd.raw || payload.motd.clean)) || [SERVER.title], statusMotd);
+    if (payload.favicon) statusIcon.src = payload.favicon;
+    renderMotd(String(payload.description == null ? SERVER.title : payload.description).split('\n'), statusMotd);
     const players = payload.players || {};
-    const list = Array.isArray(players.list) ? players.list : [];
+    const list = Array.isArray(players.sample) ? players.sample : [];
     statusCount.textContent = (players.online || 0) + '/' + (players.max || '?');
     markOnline(list.map(p => p && p.name).filter(Boolean));
-    statusEl.title = '版本 ' + (payload.version || '?')
+    statusEl.title = '版本 ' + ((payload.version && payload.version.name) || '?')
       + '　在线 ' + (players.online || 0) + '/' + (players.max || '?')
-      + (list.length ? '' : '（服务端没有公开在线名单）');
+      + (payload.latency ? '　接口测得延迟 ' + Math.round(payload.latency) + 'ms' : '')
+      + (list.length ? '' : '　（服务端没有公开在线名单）');
   }
 
   statusAddr.textContent = SERVER.address;
