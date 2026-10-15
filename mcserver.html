@@ -418,7 +418,7 @@
       statusEl.dataset.state = 'offline';
       statusMotd.textContent = '服务器离线';
       statusCount.textContent = '—';
-      statusEl.title = '服务器没有响应（服务器没开，或者穿透隧道没通）';
+      statusEl.title = '服务器没有响应';
       return;
     }
 
@@ -429,10 +429,11 @@
     const list = Array.isArray(players.sample) ? players.sample : [];
     statusCount.textContent = (players.online || 0) + '/' + (players.max || '?');
     markOnline(list.map(p => p && p.name).filter(Boolean));
+    // 只有「确实有人在线、但服务端把名单藏了」才提示；0 人在线时名单本来就该是空的
+    const listHidden = (players.online || 0) > 0 && !list.length;
     statusEl.title = '版本 ' + ((payload.version && payload.version.name) || '?')
       + '　在线 ' + (players.online || 0) + '/' + (players.max || '?')
-      + (payload.latency ? '　接口测得延迟 ' + Math.round(payload.latency) + 'ms' : '')
-      + (list.length ? '' : '　（服务端没有公开在线名单）');
+      + (payload.latency ? '　接口测得延迟 ' + Math.round(payload.latency) + 'ms' : '');
   }
 
   statusAddr.textContent = SERVER.address;
