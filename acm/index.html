@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>荣誉墙 · 程序设计竞赛</title>
+<meta name="description" content="ICPC / CCPC 程序设计竞赛获奖奖牌荣誉墙。">
+<meta name="theme-color" content="#fff8f5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="荣誉墙 · 程序设计竞赛">
+<meta property="og:description" content="ICPC / CCPC 程序设计竞赛获奖记录。">
+<!-- acm/ 是真实目录，页面就发布在 /acm/ 下，所以图片用相对路径 pic/…：直接双击打开也能正常显示 -->
+<style>
+  :root {
+    --bg: #fff8f5;
+    --fg: #4a3038;
+    --muted: #9c8189;
+    --ink: #f6b3c6;
+    --ink-2: #f6e3a1;
+    --ink-3: #bcd9ea;
+    --track: rgba(246, 179, 198, .3);
+    --card: #ffffff;
+    --radius: 18px;
+    --gold: #b8892b;
+    --silver: #7d8590;
+    --bronze: #a2643c;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1416;
+      --fg: #f7e8ec;
+      --muted: #b09aa1;
+      --track: rgba(246, 179, 198, .18);
+      --card: #241c1f;
+      --gold: #e0b34c;
+      --silver: #aeb6c0;
+      --bronze: #c9885c;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    padding-bottom: 64px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { width: min(1120px, 100% - 32px); margin: 0 auto; }
+
+  /* 页头 */
+  header { margin-top: 44px; }
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: .22em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: 800; letter-spacing: .06em;
+  }
+  .lede { margin-top: 12px; max-width: 46em; font-size: 14px; line-height: 1.9; color: var(--muted); }
+
+  /* 奖牌统计：金奖 / 银奖 / 铜奖 */
+  .tally {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 20px; list-style: none;
+  }
+  .tally li {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 15px; border-radius: 999px;
+    background: var(--card); box-shadow: 0 4px 14px rgba(74, 48, 56, .08);
+    font-size: 13px; color: var(--muted);
+  }
+  .tally b { font-size: 17px; color: var(--fg); }
+  .tally li::before {
+    content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor;
+  }
+  .tally .t-gold::before { background: var(--gold); }
+  .tally .t-silver::before { background: var(--silver); }
+  .tally .t-bronze::before { background: var(--bronze); }
+
+  /* 奖牌卡片网格：宽屏三列，窄屏自动降到两列/一列 */
+  .grid {
+    display: grid; gap: 22px; align-items: start;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    margin-top: 34px;
+  }
+  .card {
+    display: flex; flex-direction: column; overflow: hidden;
+    border-radius: var(--radius); background: var(--card);
+    box-shadow: 0 10px 30px rgba(74, 48, 56, .1);
+    transition: transform .28s cubic-bezier(.2, .7, .2, 1), box-shadow .28s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 18px 42px rgba(74, 48, 56, .18); }
+  /* 卡片顶部一道奖牌色的窄条，一眼分出金银铜 */
+  .card::before { content: ""; display: block; height: 5px; background: var(--medal, var(--ink)); }
+
+  .shot {
+    position: relative; display: block; width: 100%; padding: 0; border: 0;
+    background: var(--track); cursor: zoom-in; overflow: hidden;
+  }
+  /* 缩略图按原图比例自适应：宽度跟随卡片，高度 auto，不裁切、不变形 */
+  .shot img {
+    display: block; width: 100%; height: auto; max-width: 100%;
+    transition: transform .5s cubic-bezier(.2, .7, .2, 1), filter .3s ease;
+  }
+  .card:hover .shot img { transform: scale(1.035); }
+  .shot:focus-visible { outline: 3px solid var(--ink-3); outline-offset: -3px; }
+
+  .meta { padding: 15px 16px 18px; }
+  .medal {
+    display: inline-block; padding: 3px 11px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .1em;
+    color: #fff; background: var(--medal, var(--ink));
+  }
+  .card.gold { --medal: var(--gold); }
+  .card.silver { --medal: var(--silver); }
+  .card.bronze { --medal: var(--bronze); }
+  h2 { margin-top: 10px; font-size: 15px; font-weight: 700; line-height: 1.6; }
+  .sub { margin-top: 8px; font-size: 12.5px; line-height: 1.8; color: var(--muted); }
+  .sub .series {
+    display: inline-block; padding: 1px 7px; border-radius: 5px;
+    background: var(--track); color: var(--fg); font-weight: 700; letter-spacing: .06em;
+  }
+
+  footer { margin-top: 52px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+
+  /* 大图查看。注意 margin: auto 必须显式写：上面的 * 重置把 margin 清零，
+     否则模态框会丢掉浏览器默认的居中，弹到视口左上角 */
+  .viewer {
+    margin: auto;
+    width: min(560px, 100% - 24px); max-height: calc(100vh - 40px);
+    padding: 0; border: 0; border-radius: var(--radius);
+    background: var(--card); color: var(--fg);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .4);
+  }
+  .viewer::backdrop { background: rgba(26, 20, 22, .72); backdrop-filter: blur(4px); }
+  .viewer[open] { animation: rise .22s ease-out; }
+  .viewer-figure { display: flex; flex-direction: column; align-items: center; }
+  /* 宽度交给图片自身的比例，再靠 margin: auto 水平居中；限制高度时也不会左右跑偏 */
+  .viewer-figure img {
+    display: block; margin: 0 auto;
+    width: auto; height: auto;
+    max-width: 100%; max-height: calc(100vh - 190px);
+    object-fit: contain; background: #14100f;
+  }
+  .viewer-bar {
+    display: flex; align-items: center; gap: 12px;
+    align-self: stretch; /* 图片那行居中，底部条仍要撑满整宽 */
+    padding: 12px 14px;
+  }
+  .viewer-cap { flex: 1; min-width: 0; font-size: 13px; line-height: 1.6; }
+  .viewer-cap small { display: block; color: var(--muted); font-size: 12px; }
+  .viewer button {
+    flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%;
+    background: var(--track); color: var(--fg); font: inherit; font-size: 17px; cursor: pointer;
+    transition: background-color .2s ease;
+  }
+  .viewer button:hover { background: var(--ink); color: #4a3038; }
+  .viewer button:focus-visible { outline: 3px solid var(--ink-3); outline-offset: 2px; }
+  .viewer button[disabled] { opacity: .35; cursor: default; }
+  .viewer button[disabled]:hover { background: var(--track); color: var(--fg); }
+
+  /* 弹窗底部一行：跳转到该场比赛的官方获奖公示页。
+     data-official 为空时整行隐藏，避免出现点不开的链接 */
+  .viewer-src {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    align-self: stretch; padding: 12px 14px;
+    border-top: 1px solid var(--track);
+    color: var(--fg); font-size: 13px; text-decoration: none;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  .viewer-src::after { content: "↗"; font-size: 12px; opacity: .7; }
+  .viewer-src:hover { background: var(--ink); color: #4a3038; }
+  .viewer-src:hover::after { opacity: 1; }
+  .viewer-src:focus-visible { outline: 3px solid var(--ink-3); outline-offset: -3px; }
+  .viewer-src[hidden] { display: none; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+    h2 { font-size: 13px; }
+    .meta { padding: 12px 12px 14px; }
+    .tally li { padding: 7px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .shot img, .viewer button { transition: none; }
+    .card:hover { transform: none; }
+    .card:hover .shot img { transform: none; }
+    .viewer[open] { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">Algorithms · ACM</p>
+    <h1>荣誉墙</h1>
+    <p class="lede">
+      ICPC 国际大学生程序设计竞赛与 CCPC 中国大学生程序设计竞赛的获奖记录。
+      每一块奖牌都来自一场五个小时、三个人、一台电脑的比赛。
+    </p>
+    <ul class="tally">
+      <li class="t-gold">金奖 <b>1</b></li>
+      <li class="t-silver">银奖 <b>2</b></li>
+      <li class="t-bronze">铜奖 <b>2</b></li>
+      <li>合计 <b>5</b></li>
+    </ul>
+  </header>
+
+  <main class="grid">
+    <!-- 2026.10 金奖 -->
+    <article class="card gold">
+      <button class="shot" type="button"
+              data-src="pic/第十二届中国大学生程序设计竞赛(长春).jpg"
+              data-official="https://cpcfinder.com/contest/87"
+              data-title="第十二届中国大学生程序设计竞赛（长春）"
+              data-sub="CCPC · 长春 · 2026 年 10 月 · 金奖"
+              aria-label="查看 第十二届中国大学生程序设计竞赛（长春）金奖奖牌">
+        <img src="pic/thumbs/第十二届中国大学生程序设计竞赛(长春).webp"
+             alt="第十二届中国大学生程序设计竞赛（长春）金奖奖牌"
+             width="640" height="853" loading="lazy" decoding="async">
+      </button>
+      <div class="meta">
+        <span class="medal">金奖</span>
+        <h2>第十二届中国大学生程序设计竞赛（长春）</h2>
+        <p class="sub"><span class="series">CCPC</span><br>长春 · 2026 年 10 月</p>
+      </div>
+    </article>
+
+    <!-- 2026.04 银奖 · 总决赛 -->
+    <article class="card silver">
+      <button class="shot" type="button"
+              data-src="pic/第十一届中国大学生程序设计竞赛总决赛.jpg"
+              data-official="https://cpcfinder.com/contest/78"
+              data-title="第十一届中国大学生程序设计竞赛总决赛"
+              data-sub="CCPC · 河南南阳 · 2026 年 4 月 · 银奖"
+              aria-label="查看 第十一届中国大学生程序设计竞赛总决赛银奖奖牌">
+        <img src="pic/thumbs/第十一届中国大学生程序设计竞赛总决赛.webp"
+             alt="第十一届中国大学生程序设计竞赛总决赛银奖奖牌"
+             width="640" height="747" loading="lazy" decoding="async">
+      </button>
+      <div class="meta">
+        <span class="medal">银奖</span>
+        <h2>第十一届中国大学生程序设计竞赛总决赛</h2>
+        <p class="sub"><span class="series">CCPC</span><br>河南南阳 · 2026 年 4 月</p>
+      </div>
+    </article>
+
+    <!-- 2025.11 银奖 · 济南 -->
+    <article class="card silver">
+      <button class="shot" type="button"
+              data-src="pic/第十一届中国大学生程序设计竞赛(济南).jpg"
+              data-official="https://cpcfinder.com/contest/72"
+              data-title="第十一届中国大学生程序设计竞赛（济南）"
+              data-sub="CCPC · 济南 · 2025 年 11 月 · 银奖"
+              aria-label="查看 第十一届中国大学生程序设计竞赛（济南）银奖奖牌">
+        <img src="pic/thumbs/第十一届中国大学生程序设计竞赛(济南).webp"
+             alt="第十一届中国大学生程序设计竞赛（济南）银奖奖牌"
+             width="640" height="853" loading="lazy" decoding="async">
+      </button>
+      <div class="meta">
+        <span class="medal">银奖</span>
+        <h2>第十一届中国大学生程序设计竞赛（济南）</h2>
+        <p class="sub"><span class="series">CCPC</span><br>济南 · 2025 年 11 月</p>
+      </div>
+    </article>
+
+    <!-- 2025.11.09 铜奖 · 南京 -->
+    <article class="card bronze">
+      <button class="shot" type="button"
+              data-src="pic/第50届国际大学生程序设计竞赛亚洲区域赛（南京）.jpg"
+              data-official="https://cpcfinder.com/contest/69"
+              data-title="第 50 届 ICPC 亚洲区域赛（南京）"
+              data-sub="ICPC · 南京 · 2025 年 11 月 9 日 · 铜奖"
+              aria-label="查看 第 50 届 ICPC 亚洲区域赛（南京）铜奖奖牌">
+        <img src="pic/thumbs/第50届国际大学生程序设计竞赛亚洲区域赛（南京）.webp"
+             alt="第 50 届 ICPC 亚洲区域赛（南京）铜奖奖牌"
+             width="640" height="853" loading="lazy" decoding="async">
+      </button>
+      <div class="meta">
+        <span class="medal">铜奖</span>
+        <h2>第 50 届 ICPC 亚洲区域赛（南京）</h2>
+        <p class="sub"><span class="series">ICPC</span><br>南京 · 2025 年 11 月 9 日</p>
+      </div>
+    </article>
+
+    <!-- 2025.11.02 铜奖 · 武汉 -->
+    <article class="card bronze">
+      <button class="shot" type="button"
+              data-src="pic/第50届国际大学生程序设计竞赛亚洲区域赛（武汉）.jpg"
+              data-official="https://cpcfinder.com/contest/68"
+              data-title="第 50 届 ICPC 亚洲区域赛（武汉）"
+              data-sub="ICPC · 武汉 · 2025 年 11 月 2 日 · 铜奖"
+              aria-label="查看 第 50 届 ICPC 亚洲区域赛（武汉）铜奖奖牌">
+        <img src="pic/thumbs/第50届国际大学生程序设计竞赛亚洲区域赛（武汉）.webp"
+             alt="第 50 届 ICPC 亚洲区域赛（武汉）铜奖奖牌"
+             width="640" height="853" loading="lazy" decoding="async">
+      </button>
+      <div class="meta">
+        <span class="medal">铜奖</span>
+        <h2>第 50 届 ICPC 亚洲区域赛（武汉）</h2>
+        <p class="sub"><span class="series">ICPC</span><br>武汉 · 2025 年 11 月 2 日</p>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>奖牌照片由参赛队员拍摄，记录以组委会颁发为准。</p>
+  </footer>
+</div>
+
+<!-- 点开奖牌照片看大图：← → 翻页，Esc 关闭 -->
+<dialog class="viewer" id="viewer" aria-label="查看奖牌照片">
+  <figure class="viewer-figure">
+    <img id="viewer-img" alt="">
+    <figcaption class="viewer-bar">
+      <span class="viewer-cap" id="viewer-cap"><span id="viewer-title"></span><small id="viewer-sub"></small></span>
+      <button type="button" id="viewer-prev" aria-label="上一张">←</button>
+      <button type="button" id="viewer-next" aria-label="下一张">→</button>
+      <button type="button" id="viewer-close" aria-label="关闭">×</button>
+    </figcaption>
+    <!-- 第三方赛事榜单：地址来自对应卡片的 data-official，空着就整行不显示 -->
+    <a class="viewer-src" id="viewer-official" href="#" target="_blank" rel="noopener noreferrer" hidden>查看赛事榜单与奖项（XCPCIO）</a>
+  </figure>
+</dialog>
+
+<script>
+(() => {
+  const shots = [...document.querySelectorAll('.shot')];
+  const viewer = document.getElementById('viewer');
+
+  // 不支持 <dialog> 的老浏览器：直接在新标签页打开原图
+  if (typeof viewer.showModal !== 'function') {
+    shots.forEach(shot => shot.addEventListener('click', () => window.open(shot.dataset.src, '_blank')));
+    return;
+  }
+
+  const img = document.getElementById('viewer-img');
+  const title = document.getElementById('viewer-title');
+  const sub = document.getElementById('viewer-sub');
+  const official = document.getElementById('viewer-official');
+  const prev = document.getElementById('viewer-prev');
+  const next = document.getElementById('viewer-next');
+  let index = -1;
+
+  function show(i) {
+    index = (i + shots.length) % shots.length;
+    const shot = shots[index];
+    img.src = shot.dataset.src;
+    img.alt = shot.querySelector('img').alt;
+    title.textContent = shot.dataset.title;
+    sub.textContent = shot.dataset.sub;
+
+    // 这张有官方公示地址才显示底部链接，没有就整行收起
+    const url = shot.dataset.official;
+    official.hidden = !url;
+    if (url) official.href = url;
+    else official.removeAttribute('href');
+
+    prev.disabled = next.disabled = shots.length < 2;
+  }
+
+  shots.forEach((shot, i) => shot.addEventListener('click', () => {
+    show(i);
+    viewer.showModal();
+  }));
+
+  prev.addEventListener('click', () => show(index - 1));
+  next.addEventListener('click', () => show(index + 1));
+  document.getElementById('viewer-close').addEventListener('click', () => viewer.close());
+  viewer.addEventListener('click', e => { if (e.target === viewer) viewer.close(); }); // 点遮罩关闭
+  viewer.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
+  });
+})();
+</script>
+</body>
+</html>
